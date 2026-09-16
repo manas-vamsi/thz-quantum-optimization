@@ -70,6 +70,20 @@ extent that produced it — see
 The dynamic-reconfiguration aspect of the paper is **not** implemented here;
 only static layouts are compared.
 
+## 3b. What the paper's own appendix code does and does not do
+
+Read together with its published appendix (analysis in
+[`docs/design_space.md`](docs/design_space.md) §1): the code generates a
+single-arm log spiral, forms all baselines with conjugates, and plots them. It
+contains **no UV-coverage computation at all** - no grid, no cell size, no
+count - so the 95 % / 60 % figures in the paper's Table 2 are not outputs of
+the published code. Two further claims do not follow: a rigid rotation of an
+array is an isometry and cannot change `b_max`, so it cannot improve
+resolution (only radial motion can); and the +41 % SNR is the ordinary
+`sqrt(k)` gain from integrating longer, which any array gets. **[CHOICE: this
+repository therefore treats the paper's geometry as a hypothesis to test, and
+its quantitative claims as unreproduced.]**
+
 ## 4. The Fibonacci alternative
 
 Substituting a Fibonacci number for $\Phi$ in $r = a\Phi^{\theta/2\pi}$ is not
@@ -124,6 +138,26 @@ problem that regime is also the regime where the objective is constant and
 useless. So the pairwise form is an approximation, and the repository measures
 how good an approximation it is rather than asserting one.
 
+## 9b. Beyond golden vs Fibonacci
+
+Both are closed-form curves chosen for their mathematics rather than for an
+imaging objective. [`docs/design_space.md`](docs/design_space.md) surveys what
+the field uses instead - curves of constant width (Keto 1997), multi-arm log
+spirals (Conway/ALMA), Gaussian-density layouts (Boone 2002), hierarchical
+arrays (Keto 2012), minimum-redundancy arrays (Golay 1971) - and what it
+optimises: Cornwell's UV-point repulsion energy, target UV-density matching,
+PSF sidelobes, multi-objective imaging-vs-cable-length. All of these are
+implemented in `arrays/geometries.py` and `metrics/density_matching.py` and
+measured in experiment 06.
+
+The key structural result, in [`docs/design_space.md`](docs/design_space.md)
+§5: rewriting the objective in **baseline-activation variables**
+`y_k = x_i x_j` makes Cornwell's energy, target-density matching, and a
+second-order (Bonferroni) bound on unique-cell coverage **all exactly
+quadratic**, with `y_k = x_i x_j` enforced exactly by a Rosenberg penalty. The
+model becomes a true QUBO over `M + M(M-1)/2` variables with no approximation
+of the objective.
+
 ## 10. Preliminary results
 
 All numbers from `experiments/`, config `configs/default.yaml`,
@@ -170,6 +204,32 @@ Single declination, single extent, single wavelength, single grid, no noise,
 no deconvolution, no science case. The constructions differ in radial *and*
 angular law simultaneously, so no difference can be attributed to either.
 
+### Layout shootout, twelve families, N = 20 **[RESULT, experiment 06]**
+
+| layout | unique UV cells | Cornwell F (lower better) | Gaussian chi2 (lower better) | PSF sidelobe (lower better) |
+|---|---|---|---|---|
+| **Reuleaux (1 ring)** | **10226** | **30.5** | 1.05 | 0.132 |
+| hierarchical 3^3 | 9596 | 208.9 | 0.93 | 0.201 |
+| random (area-uniform) | 9266 | 40.0 | 0.067 | 0.178 |
+| Vogel golden angle | 9018 | 34.6 | 0.251 | 0.124 |
+| Gaussian (Boone target) | 7844 | 46.3 | **0.096** | 0.151 |
+| log spiral, 3 arms | 7736 | 70.1 | 0.214 | 0.098 |
+| **golden spiral (1 arm)** | 6872 | 74.9 | **0.023** | **0.090** |
+| Fibonacci radial | 1813 | 1322.6 | 14.4 | 0.386 |
+
+1. The Reuleaux triangle covers **49 % more unique UV cells** than the golden
+   spiral with **less than half** its Cornwell energy - as Keto (1997)
+   predicted, and the reason the SMA's pads are nested Reuleaux triangles.
+2. **The objectives disagree.** Reuleaux wins cell count, Cornwell energy and
+   FWHM; the golden spiral wins Gaussian-density match and ties on peak
+   sidelobe. "Best layout" is undefined until the science case fixes the
+   objective.
+3. **The golden angle is not special.** Scanning the phyllotaxis angle at fixed
+   N, extent and grid, it ranks **6th of 10**: sqrt(3)-1, 1/e, 5/13, sqrt(2)-1
+   and 1/pi all score higher on cell count. Only low-order rationals (1/2, 1/3)
+   are clearly bad, and they are bad because they collapse position angles onto
+   q directions. What matters is "not a low-order rational", not "golden".
+
 ### Toy QUBO (M = 8 pads, N = 4, $\lambda$ = 1 mm) **[RESULT]**
 
 - Direct objective vs matrix QUBO over all $2^8 = 256$ configurations:
@@ -185,6 +245,29 @@ angular law simultaneously, so no difference can be attributed to either.
 - Exact auxiliary-variable construction for the same toy problem:
   **138 binary variables** (8 pads + 28 pairs + 46 cells + 56 slack) to select
   4 antennas from 8. Exactness is affordable only at toy scale.
+
+### QUBO formulation comparison **[RESULT, experiment 07]**
+
+Same toy problem under Earth-rotation sampling, all 70 feasible selections
+enumerated:
+
+| UV cells/axis | pairwise surrogate rho | Bonferroni rho | pairwise finds optimum | Bonferroni finds optimum |
+|---|---|---|---|---|
+| 8 | 0.896 | 0.910 | no | **yes** |
+| 16 | 0.964 | 0.994 | no | **yes** |
+| 32 | 0.981 | 0.996 | no | **yes** |
+| 64 | 0.991 | **1.000** | yes | **yes** |
+| 128 | 0.993 | **1.000** | yes | **yes** |
+
+The baseline-space Bonferroni formulation finds the true optimum at **every**
+resolution; the pairwise surrogate misses it at four of eight. Cost at 16
+cells/axis: 8 variables (pairwise) vs **36** (Bonferroni, 10 % coupling fill)
+vs 280 (exact cell variables). Bonferroni scales as `M + M(M-1)/2` - 1275
+variables at M = 50, 5050 at M = 100.
+
+With `sum_i x_i = N` and a pairwise reward this is exactly
+**densest-k-subgraph**: NP-hard, no known constant-factor approximation. That
+is the structural reason a QUBO solver is worth trying here at all.
 
 ## 11. Current limitations
 
@@ -214,6 +297,8 @@ angular law simultaneously, so no difference can be attributed to either.
 | `03_earth_rotation.py` | UV tracks, coverage growth vs integration time | figs 11, 12; `exp03_*.csv` |
 | `04_psf_comparison.py` | dirty beams and cuts | fig 8; `exp04_psf_metrics.csv` |
 | `05_small_qubo.py` | toy QUBO: validate, enumerate, measure the surrogate | fig 10; `exp05_*.{json,csv}` |
+| `06_layout_shootout.py` | twelve layout families on three objectives + phyllotaxis-angle sweep | figs 13, 14, 15; `exp06_*.csv` |
+| `07_formulation_comparison.py` | pairwise vs Bonferroni vs exact QUBO formulations | fig 16; `exp07_*.{csv,json}` |
 
 Every figure carries its generating parameters in the corner. Every run writes
 coordinates, baselines, UV samples, occupancy grids and metrics to
@@ -243,20 +328,25 @@ and is not used by any of the above. Random layouts are seeded from
 
 ## 14. What should be done next
 
-1. **Factorial layout experiment** — separate the radial law from the angular
-   law, so a difference can be attributed to one of them.
-2. **Declination and hour-angle sweep** — every result here is at one
-   geometry.
-3. **A science-driven metric** — decide what the array is *for*, then weight
-   the UV plane accordingly instead of counting cells.
-4. **Replace the phase placeholder** with a coherence model somebody can
-   defend, or drop the term until then.
-5. **Real pad candidates and real PWV statistics** before any claim about a
-   physical site.
-6. **Then** a solver: `dimod`/`dwave-neal` on the validated pairwise QUBO,
-   benchmarked against exhaustive enumeration at small $M$ and against a
-   classical heuristic at large $M$ — with the solver's answer verified by
-   recomputing exact coverage and the PSF.
+Ordered by what unblocks the most, per
+[`docs/design_space.md`](docs/design_space.md) §6:
+
+1. **A classical optimiser** - greedy removal against the Bonferroni objective
+   (Panduranga Rao et al. 2009 style), then simulated annealing. Without it
+   there is no baseline, and no way to tell whether any configuration here is
+   good.
+2. **A science case, and a target UV density derived from it.** Every "best
+   layout" above is best only under an arbitrary metric.
+3. **Factorial layout experiment** - radial law x angular law separately, so
+   the differences in experiment 06 can be attributed.
+4. **Declination and hour-angle sweep** - every result here is at one geometry.
+5. **Scale the baseline-space QUBO** to M = 50-100 pads and benchmark against
+   greedy and SA *before* any quantum solver is involved.
+6. **Then** quantum: `dimod`/`dwave-neal` exact on the 36-variable toy, hybrid
+   at M = 100 (5050 variables is within reach of hybrid solvers, not of a bare
+   Advantage QPU at this coupling density).
+7. **Replace the phase and PWV placeholders** with something physically
+   defensible before any THz-specific claim is made.
 
 ## Repository layout
 
@@ -265,9 +355,10 @@ src/thz_opt/         arrays/ interferometry/ metrics/ constraints/ qubo/
 experiments/         01..05 + common.py
 tests/               70 tests across arrays, baselines, uv, metrics, qubo
 configs/             default.yaml, experiments.yaml
-docs/                mathematical_formulation, fibonacci_vs_golden, uv_metrics, qubo_mapping
+docs/                mathematical_formulation, fibonacci_vs_golden, uv_metrics,
+                     qubo_mapping, design_space
 data/                generated/ (npz)  results/ (csv, json)
-figures/             fig01 .. fig12
+figures/             fig01 .. fig16
 ```
 
 ## Licence
