@@ -178,3 +178,44 @@ def test_bonferroni_beats_the_pairwise_surrogate_under_earth_rotation():
     assert np.all(bonf <= exact + 1e-9)
     assert rho(bonf, exact) >= rho(surr, exact)
     assert exact[int(np.argmax(bonf))] >= exact.max() - 1e-9
+
+
+def test_sidelobe_energy_form_is_exact():
+    """The onboarding guide's H_uv, verified against direct gridding.
+
+    sum_c n_c^2 = sum_k A_k y_k + 2 sum_{k<l} B_kl y_k y_l, with A and B built
+    from per-baseline cell multiplicities.  By Parseval this is the dirty
+    beam's total energy, so minimising it minimises sidelobes.
+    """
+    from thz_opt.interferometry.earth_rotation import layout_to_uv_tracks
+    from thz_opt.interferometry.uv import uv_occupancy
+    from thz_opt.qubo.baseline_qubo import sidelobe_energy_terms, track_cell_multiplicities
+
+    obs = ObservationConfig(frequency_hz=3e11, declination_deg=-30.0,
+                            latitude_deg=-23.0, n_times=11)
+    pads = golden_spiral_layout(M, r_min=20.0, r_max=400.0)
+    grid = UVGrid.from_uv(layout_to_uv_tracks(pads, obs), 32)
+    mult = track_cell_multiplicities(pads, LAM, grid, obs)
+    terms = sidelobe_energy_terms(mult, M)
+
+    for x in feasible_configurations(M, N):
+        occ, _ = uv_occupancy(layout_to_uv_tracks(pads[np.asarray(x, dtype=bool)], obs), grid)
+        direct = float(np.sum(occ.astype(float) ** 2))
+        assert objective_value(selection_to_y(x, M), terms) == pytest.approx(direct)
+
+
+def test_parseval_links_sidelobe_energy_to_the_beam():
+    """sum_c n_c^2 / N^2 is exactly the dirty beam's total energy."""
+    from thz_opt.interferometry.earth_rotation import layout_to_uv_tracks
+    from thz_opt.interferometry.uv import uv_occupancy
+
+    obs = ObservationConfig(frequency_hz=3e11, declination_deg=-30.0,
+                            latitude_deg=-23.0, n_times=11)
+    xy = golden_spiral_layout(12, r_min=20.0, r_max=1000.0)
+    uv = layout_to_uv_tracks(xy, obs)
+    grid = UVGrid.from_uv(uv, 64)
+    occ, _ = uv_occupancy(uv, grid)
+    S = occ.astype(float)
+    psf = np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(S)))
+    n = grid.n_cells
+    assert float(np.sum(np.abs(psf) ** 2)) == pytest.approx(float(np.sum(S ** 2)) / (n * n))

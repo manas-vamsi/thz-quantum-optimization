@@ -75,6 +75,8 @@ __all__ = [
     "bonferroni_coverage_terms",
     "bonferroni_bound",
     "cornwell_terms",
+    "track_cell_multiplicities",
+    "sidelobe_energy_terms",
     "density_match_terms",
     "objective_value",
 ]
@@ -242,7 +244,98 @@ def cornwell_terms(
 
 
 # --------------------------------------------------------------------------
-# objective 3 -- target UV density matching
+# objective 3 -- PSF sidelobe energy (the onboarding guide's H_uv, exactly)
+# --------------------------------------------------------------------------
+
+def track_cell_multiplicities(
+    pads: np.ndarray,
+    wavelength: float,
+    grid,
+    observation=None,
+    include_conjugate: bool = True,
+) -> list:
+    """For each candidate pair, ``{cell id: number of samples in that cell}``.
+
+    Unlike :func:`thz_opt.qubo.coefficients.baseline_cell_sets` this keeps the
+    *multiplicity*: an Earth-rotation track can revisit the same UV cell several
+    times, and the sidelobe-energy objective below depends on that count, not
+    just on which cells are touched.
+    """
+    from ..interferometry.earth_rotation import layout_to_uv_tracks
+    from ..interferometry.uv import cell_ids
+
+    arr = np.asarray(pads, dtype=float)
+    i_idx, j_idx = pair_indices(arr.shape[0])
+
+    out = []
+    for a, b in zip(i_idx, j_idx):
+        pair = arr[[int(a), int(b)]]
+        if observation is None:
+            uv = (pair[1:2] - pair[0:1]) / wavelength
+            if include_conjugate:
+                uv = np.vstack((uv, -uv))
+        else:
+            uv = layout_to_uv_tracks(pair, observation, include_conjugate)
+        counts: dict = {}
+        for c in cell_ids(uv, grid).tolist():
+            counts[int(c)] = counts.get(int(c), 0) + 1
+        out.append(counts)
+    return out
+
+
+def sidelobe_energy_terms(multiplicities: list, n_pads: int) -> BaselineTerms:
+    """PSF sidelobe energy as an exact quadratic in the baseline variables.
+
+    Let ``a_ck`` be the number of samples baseline ``k`` places in UV cell ``c``,
+    so the gridded sampling function of a selection is ``n_c = sum_k a_ck y_k``.
+    Using ``y^2 = y``,
+
+        sum_c n_c^2 = sum_k (sum_c a_ck^2) y_k
+                    + 2 sum_{k<l} (sum_c a_ck a_cl) y_k y_l
+
+    which is exact -- verified to machine precision against direct gridding in
+    ``tests/test_baseline_qubo.py``.
+
+    Why this is the objective the onboarding guide asks for: by Parseval's
+    theorem the dirty beam ``PSF = F^-1[n]`` satisfies
+
+        sum_{l,m} |PSF(l,m)|^2 = sum_c n_c^2 / N^2
+
+    and the beam peak is ``sum_c n_c / N^2``.  Normalising the peak to 1, the
+    total energy in the beam is ``N^2 sum_c n_c^2 / (sum_c n_c)^2``.  So
+    minimising ``sum_c n_c^2`` at a fixed number of samples minimises the energy
+    outside the main lobe -- exactly the guide's statement that minimising the
+    auto-correlation of the UV density minimises PSF sidelobes.
+
+    Note this is *not* the same objective as maximising unique-cell coverage
+    (:func:`bonferroni_coverage_terms`): coverage wants more occupied cells,
+    sidelobe energy wants the occupancy spread evenly.  They agree on hating
+    redundancy and disagree on everything else, so pick one deliberately or
+    combine them with a stated weight.
+    """
+    lin = np.array([float(sum(v * v for v in d.values())) for d in multiplicities])
+
+    quad: dict = {}
+    by_cell: dict = {}
+    for k, d in enumerate(multiplicities):
+        for c, v in d.items():
+            by_cell.setdefault(c, []).append((k, v))
+    for entries in by_cell.values():
+        if len(entries) < 2:
+            continue
+        for a in range(len(entries)):
+            ka, va = entries[a]
+            for b in range(a + 1, len(entries)):
+                kb, vb = entries[b]
+                key = (ka, kb) if ka < kb else (kb, ka)
+                quad[key] = quad.get(key, 0.0) + 2.0 * va * vb
+
+    return BaselineTerms(n_pads=n_pads, linear=lin, quadratic=quad,
+                         name="psf_sidelobe_energy")
+
+
+# --------------------------------------------------------------------------
+# objective 4 -- target UV density matching
 # --------------------------------------------------------------------------
 
 def density_match_terms(
