@@ -1,0 +1,16 @@
+# Runtime dependencies of the classical pipeline.
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pandas>=2.0
+PyYAML>=6.0
+
+# Testing
+pytest>=7.4
+
+# Optional, NOT required by anything in this repository yet.  The first
+# milestone is entirely classical; these are listed only so the intended
+# solver stack is on record.
+#   dimod>=0.12
+#   dwave-neal>=0.6
+#   qiskit>=1.0
