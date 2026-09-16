@@ -115,6 +115,12 @@ Details: [`docs/mathematical_formulation.md`](docs/mathematical_formulation.md),
 
 ## 9. QUBO formulation
 
+> **The full derivation lives in
+> [`docs/objective_function.md`](docs/objective_function.md)** — every term
+> derived from physics, expanded into explicit matrix entries, with the
+> validation table and the open questions. That document is the deliverable
+> for the objective-function formulation; this section is the summary.
+
 $$H_{\rm select} = \lambda_{\rm sel}\Big(\textstyle\sum_i x_i - N\Big)^2,
 \qquad
 H_{\rm shadow} = \lambda_{\rm sh}\!\!\!\sum_{i<j,\,d_{ij}<d_{\min}}\!\!\! x_ix_j,
@@ -274,9 +280,14 @@ is the structural reason a QUBO solver is worth trying here at all.
 - No quantum solver. Deliberate: the classical objective is not yet settled.
 - PWV costs are **synthetic** (`constant`, `altitude`). No measured atmospheric
   data is shipped and none is invented. The term is an interface, not physics.
-- The phase term is a **graph-connectivity placeholder**, not a coherence
-  model. Its parameters (`coherence_length_m`, `core_radius_m`) are free
-  numbers, not measurements.
+- The phase term now has **two** implementations: a graph-connectivity
+  placeholder (`constraints/phase.py`) and a physically grounded Kolmogorov
+  structure-function + decorrelation model (`constraints/coherence.py`,
+  derived in [`docs/objective_function.md`](docs/objective_function.md) §4.3).
+  The second is standard millimetre-wave physics and is exactly quadratic in
+  the pad variables, but its constants (`sigma_1km`, turbulence breakpoints,
+  and the residual factor `kappa` after phase referencing) are typical values,
+  **not** measurements of any site.
 - Arrays are strictly coplanar; no station heights, no $w$-term, no
   non-coplanar correction.
 - PSF: no gridding kernel, no taper, no deconvolution, no noise. Absolute
@@ -355,7 +366,8 @@ src/thz_opt/         arrays/ interferometry/ metrics/ constraints/ qubo/
 experiments/         01..05 + common.py
 tests/               70 tests across arrays, baselines, uv, metrics, qubo
 configs/             default.yaml, experiments.yaml
-docs/                mathematical_formulation, fibonacci_vs_golden, uv_metrics,
+docs/                objective_function  <- the derivation, start to finish
+                     mathematical_formulation, fibonacci_vs_golden, uv_metrics,
                      qubo_mapping, design_space
 data/                generated/ (npz)  results/ (csv, json)
 figures/             fig01 .. fig16
