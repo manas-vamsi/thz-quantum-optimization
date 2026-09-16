@@ -1,0 +1,80 @@
+{
+  "convention_check": {
+    "max_abs_difference": 0.0,
+    "n_trials": 64,
+    "within_tolerance": true
+  },
+  "exact_construction": {
+    "n_slack": 56,
+    "n_variables": 138,
+    "n_x": 8,
+    "n_y": 28,
+    "n_z": 46
+  },
+  "optimum": {
+    "bits": "00111100",
+    "cells_covered": 12,
+    "energy": -12.0,
+    "terms": {
+      "H_phase": 0.0,
+      "H_pwv": 0.0,
+      "H_select": 0.0,
+      "H_shadow": 0.0,
+      "H_total": -12.0,
+      "H_uv": -12.0
+    }
+  },
+  "parameters": {
+    "grid_cells_report": 16,
+    "grid_cells_sweep": [
+      8,
+      12,
+      16,
+      24,
+      32,
+      64,
+      128,
+      256
+    ],
+    "n_pads": 8,
+    "n_select": 4,
+    "note": "toy values for illustration only",
+    "penalty_safety_factor": 2.0,
+    "r_max_m": 400.0,
+    "r_min_m": 20.0,
+    "wavelength_m": 0.001,
+    "weightings": [
+      "count",
+      "shared",
+      "radial"
+    ]
+  },
+  "penalty_weights": {
+    "lambda_phase": 24.0,
+    "lambda_pwv": 0.0,
+    "lambda_select": 24.0,
+    "lambda_shadow": 24.0,
+    "n_shadow_pairs": 0,
+    "rule": "lambda = safety * (sum of the N(N-1)/2 largest w_ij)",
+    "safety_factor": 2.0,
+    "u_max": 12.0
+  },
+  "separation": {
+    "d_min_m": 9.0,
+    "dish_diameter_m": 6.0,
+    "min_separation_m": 65.49220986283096,
+    "minimum_separation_factor": 1.5,
+    "n_violations": 0,
+    "valid": true,
+    "violations": []
+  },
+  "validation": {
+    "max_abs_difference": 0.0,
+    "n_configurations": 256,
+    "tolerance": 1e-09,
+    "within_tolerance": true,
+    "worst_config": "00000000",
+    "worst_direct": 384.0,
+    "worst_qubo": 384.0
+  }
+}
