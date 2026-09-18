@@ -525,6 +525,10 @@ reproduce any result in this manuscript.
 
 ## References
 
+Every DOI below was resolved against CrossRef, and every arXiv identifier
+against the arXiv record, on 2026-09-18; the author and title returned were
+compared with the entry as written. `verify_citations.py` repeats the check.
+
 
 
 [1] A. R. Thompson, J. M. Moran, and G. W. Swenson, *Interferometry and
@@ -579,7 +583,7 @@ radio antenna placement," 2009, arXiv:0901.4901.
 
 [13] M. J. E. Golay, "Point arrays having compact, nonredundant
 autocorrelations," *Journal of the Optical Society of America*, vol. 61, no. 2,
-pp. 272-273, 1971.
+pp. 272-273, 1971, doi: 10.1364/JOSA.61.000272.
 
 [14] J. McKay et al., "Manx arrays: perfect non-redundant interferometric
 geometries," *Radio Science*, vol. 57, e2022RS007500, 2022,
@@ -587,11 +591,11 @@ doi: 10.1029/2022RS007500.
 
 [15] L. Kogan, "Optimizing a large array configuration to minimize the
 sidelobes," *IEEE Transactions on Antennas and Propagation*, vol. 48, no. 7,
-pp. 1075-1078, 2000.
+pp. 1075-1078, 2000, doi: 10.1109/8.876326.
 
 [16] E. Boros and A. Gruber, "On quadratization of pseudo-Boolean functions,"
 2014, arXiv:1404.6538.
 
-[17] A. Verma and M. Lewis, "Penalty weights in QUBO formulations: permutation
-problems," 2022, arXiv:2206.11040.
+[17] M. Ayodele, "Penalty weights in QUBO formulations: permutation problems,"
+2022, arXiv:2206.11040.
 
