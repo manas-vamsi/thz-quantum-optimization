@@ -22,18 +22,32 @@ quadratic:
 
 ``P_k = 0`` when ``y_k = x_i x_j`` and ``P_k >= 1`` otherwise, for every binary
 assignment.  The whole model is then a genuine QUBO over ``M + M(M-1)/2``
-variables with **no approximation of the objective at all** -- in exchange for a
-larger variable count.  That is a very different trade from the pairwise
-surrogate of :mod:`thz_opt.qubo.coefficients`, and much cheaper than the
-cell-variable construction in :mod:`thz_opt.qubo.objective`
-(which also needs one variable per UV cell plus slack bits).
+variables, in exchange for a larger variable count than the pairwise surrogate
+of :mod:`thz_opt.qubo.coefficients` and a much smaller one than the
+cell-variable construction in :mod:`thz_opt.qubo.objective`.
+
+**Be precise about what "exact" means here**, because the objectives differ:
+
+* PSF sidelobe energy, Cornwell repulsion and target-density matching are
+  represented **exactly** -- the quadratic form equals the quantity itself.
+* Unique-cell coverage is **not**.  What is represented exactly is the
+  second-order Bonferroni *lower bound* on it, which equals the coverage only
+  when no UV cell is touched by three or more active baselines.  Exact union
+  coverage needs either cell variables (see
+  :func:`thz_opt.qubo.objective.build_qubo_with_cell_variables`) or a
+  higher-order inclusion-exclusion construction.
+
+So: exact representation of a bound is not the same as exact representation of
+coverage, and the distinction is measured rather than glossed -- experiment 07
+reports the bound gap as a function of UV resolution (25 % at the coarsest grid
+tested, 0.01 % at the finest).
 
 Three objectives are provided, each a pure ``(linear, quadratic)`` pair over
 ``y``:
 
 ``bonferroni_coverage_terms``
-    Second-order inclusion-exclusion (Bonferroni) bound on unique UV-cell
-    coverage:
+    Second-order inclusion-exclusion (Bonferroni) **lower bound** on unique
+    UV-cell coverage -- the bound, not the coverage:
 
         |Cov| >= sum_k |C_k| y_k - sum_{k<l} |C_k ^ C_l| y_k y_l
 
@@ -54,7 +68,12 @@ Three objectives are provided, each a pure ``(linear, quadratic)`` pair over
     difference between the achieved radial UV histogram and a target
     (e.g. Gaussian).  Expanding the square gives exactly quadratic ``y`` terms.
 
-All three return coefficients for a **minimisation** problem.
+``sidelobe_energy_terms`` / ``coherence_weighted_sidelobe_terms``
+    ``sum_c n_c^2``, which by Parseval is the dirty beam's total energy, with
+    each baseline optionally weighted by the fraction of its coherence that
+    survives the atmosphere.  Exact.
+
+All return coefficients for a **minimisation** problem.
 """
 
 from __future__ import annotations
@@ -77,6 +96,7 @@ __all__ = [
     "cornwell_terms",
     "track_cell_multiplicities",
     "sidelobe_energy_terms",
+    "coherence_weighted_sidelobe_terms",
     "density_match_terms",
     "objective_value",
 ]
@@ -332,6 +352,89 @@ def sidelobe_energy_terms(multiplicities: list, n_pads: int) -> BaselineTerms:
 
     return BaselineTerms(n_pads=n_pads, linear=lin, quadratic=quad,
                          name="psf_sidelobe_energy")
+
+
+def coherence_weighted_sidelobe_terms(
+    multiplicities: list,
+    gamma: np.ndarray,
+    n_pads: int,
+    t: float = 0.0,
+    gamma_power: float = 2.0,
+) -> BaselineTerms:
+    """Sidelobe energy with each baseline weighted by its surviving coherence.
+
+    This is the THz-specific objective. A baseline that the atmosphere
+    decorrelates contributes sampling but not signal, so the effective gridded
+    weight is
+
+        n_c = sum_k g_k a_ck y_k,      g_k = gamma_k ** gamma_power
+
+    and the sidelobe energy is again exactly quadratic:
+
+        sum_c n_c^2 = sum_k g_k^2 A_k y_k + 2 sum_{k<l} g_k g_l B_kl y_k y_l
+
+    ``gamma_power``: use **2** if ``n_c`` is meant to be an inverse-variance
+    (sensitivity) weight -- decorrelation scales signal by ``gamma`` at fixed
+    noise, so SNR scales as ``gamma`` and the optimal weight as ``gamma^2``.
+    Use **1** if ``n_c`` is meant to be the visibility amplitude response. The
+    default is 2; which one is right depends on the assumed noise model and is
+    a question for the collaboration, so it is a parameter.
+
+    The normalisation problem, and its exact fix
+    --------------------------------------------
+    The quantity actually proportional to unit-peak beam energy is the *ratio*
+    ``sum_c n_c^2 / (sum_c n_c)^2``.  With ``gamma == 1`` and equal track
+    lengths the denominator is constant at fixed cardinality, so minimising the
+    numerator alone is equivalent.  With coherence weighting it is **not** --
+    different baselines carry different ``g_k`` -- and a ratio is not a
+    quadratic form.
+
+    The fix is Dinkelbach's parametric method for linear-fractional
+    programming: minimising ``F(y)/G(y)`` is solved by repeatedly minimising
+
+        F(y) - t * G(y)
+
+    and updating ``t <- F(y*)/G(y*)`` until it stops moving.  Here
+    ``G(y) = (sum_k g_k T_k y_k)^2`` with ``T_k`` the number of samples in
+    track ``k``, which is **also** exactly quadratic in ``y``.  So each
+    Dinkelbach iteration is an ordinary QUBO, and the normalised objective is
+    reachable exactly rather than approximated.  Pass the current ``t`` here;
+    ``t = 0`` gives the unnormalised numerator.
+    """
+    g = np.asarray(gamma, dtype=float) ** float(gamma_power)
+    if g.shape[0] != len(multiplicities):
+        raise ValueError("gamma must have one entry per candidate pair")
+
+    lin = np.array([g[k] ** 2 * float(sum(v * v for v in d.values()))
+                    for k, d in enumerate(multiplicities)])
+
+    quad: dict = {}
+    by_cell: dict = {}
+    for k, d in enumerate(multiplicities):
+        for c, v in d.items():
+            by_cell.setdefault(c, []).append((k, v))
+    for entries in by_cell.values():
+        if len(entries) < 2:
+            continue
+        for a in range(len(entries)):
+            ka, va = entries[a]
+            for b in range(a + 1, len(entries)):
+                kb, vb = entries[b]
+                key = (ka, kb) if ka < kb else (kb, ka)
+                quad[key] = quad.get(key, 0.0) + 2.0 * g[ka] * va * g[kb] * vb
+
+    if t != 0.0:
+        # subtract t * (sum_c n_c)^2 = t * (sum_k g_k T_k y_k)^2
+        tot = np.array([g[k] * float(sum(d.values())) for k, d in enumerate(multiplicities)])
+        lin = lin - t * tot ** 2
+        for k in range(len(tot)):
+            for l in range(k + 1, len(tot)):
+                c = -2.0 * t * tot[k] * tot[l]
+                if c != 0.0:
+                    quad[(k, l)] = quad.get((k, l), 0.0) + c
+
+    return BaselineTerms(n_pads=n_pads, linear=lin, quadratic=quad,
+                         name=f"coherence_weighted_sidelobe(t={t})")
 
 
 # --------------------------------------------------------------------------
