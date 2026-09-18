@@ -133,6 +133,17 @@ def inline(text: str) -> str:
     t = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<i>\1</i>", t)
     t = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<link href="\2">\1</link>', t)
     t = re.sub(r"\[([^\]]+)\]\((?!https?://)[^)]+\)", r"\1", t)   # local links: keep text
+
+    # Autolinks: a reader should be able to click a DOI, not retype it.
+    # <url> form first, then bare URLs, then doi: and arXiv: identifiers.
+    t = re.sub(r"&lt;(https?://[^\s&]+)&gt;",
+               r'<link href="\1" color="blue">\1</link>', t)
+    t = re.sub(r'(?<![">/])\b(https?://[^\s<),]*[^\s<),.])',
+               r'<link href="\1" color="blue">\1</link>', t)
+    t = re.sub(r"\bdoi:\s*(10\.\d{4,9}/[^\s,;<]*[^\s,;<.])",
+               r'doi: <link href="https://doi.org/\1" color="blue">\1</link>', t)
+    t = re.sub(r"\barXiv:([\w.\-/]+\d)",
+               r'<link href="https://arxiv.org/abs/\1" color="blue">arXiv:\1</link>', t)
     return t
 
 

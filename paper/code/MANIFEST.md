@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `917af27` on 2026-09-18.
+Synchronised from the project repository at commit `f91282c` on 2026-09-18.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
