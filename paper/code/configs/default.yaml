@@ -1,0 +1,45 @@
+# Default parameters shared by every experiment.
+#
+# Nothing in this file is a measured instrument parameter.  The values are
+# illustrative choices that keep the comparisons controlled: every layout in a
+# comparison uses the same N, the same radial extent, the same wavelength and
+# the same UV grid, because otherwise the metrics are not comparable.
+
+array:
+  n_antennas: 20            # experiment A/B/C/D override this
+  r_min_m: 20.0             # inner radius of every generated layout
+  r_max_m: 1000.0           # outer radius of every generated layout
+  n_turns: 3.0              # golden spiral only
+  theta_0_rad: 0.0
+  orientation_rad: 0.0
+  fibonacci_variant: radial # radial | golden_angle | rational_angle
+  fibonacci_skip: 2         # drop the non-asymptotic 1, 1 head of the sequence
+  fibonacci_rational_index: 8
+  random_seed: 20250916
+
+observation:
+  frequency_hz: 3.0e11      # 300 GHz -> lambda = 0.999 mm; illustrative only
+  declination_deg: -30.0
+  latitude_deg: -23.0       # illustrative high-site latitude, not a real site
+  hour_angle_start_h: -2.0
+  hour_angle_end_h: 2.0
+  n_times: 41
+
+uv_grid:
+  n_cells: 256              # bins per axis over [-uv_max, +uv_max]
+  pad: 1.02                 # uv_max = pad * max|uv| of the reference layout
+  shared_extent: true       # all layouts in one comparison share one grid
+
+psf:
+  weighting: uniform        # uniform | natural
+
+constraints:
+  dish_diameter_m: 6.0
+  minimum_separation_factor: 1.5   # d_min = factor * D, per the onboarding note
+  coherence_length_m: 300.0        # phase surrogate, NOT a measured coherence length
+  core_radius_m: 150.0
+
+analysis:
+  n_radial_bins: 30
+  n_angular_bins: 36
+  n_length_bins: 20

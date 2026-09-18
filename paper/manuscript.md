@@ -194,7 +194,7 @@ at every tested resolution.
 | 64 | 0.991 | 1.000 | yes | yes |
 | 128 | 0.993 | 1.000 | yes | yes |
 
-![Figure 1. Formulation comparison: baseline variables preserve substantially more of the exact-coverage ordering than a pad-only surrogate.](../figures/fig16_formulation_comparison.png)
+![Figure 1. Formulation comparison: baseline variables preserve substantially more of the exact-coverage ordering than a pad-only surrogate.](figures/fig16_formulation_comparison.png)
 
 ### 4.2 Classical optimizer benchmark
 
@@ -222,7 +222,7 @@ of optimal, proven, without the solver ever finishing.
 | Simulated annealing | 763 | 0.069 | 18.2-44.3 |
 | MILP incumbent, time limited | 747 | 0.069 | 300 |
 
-![Figure 2. Classical optimizer comparison.](../figures/fig17_optimizer_comparison.png)
+![Figure 2. Classical optimizer comparison.](figures/fig17_optimizer_comparison.png)
 
 #### 4.2.1 Certified instances and the limit of certification
 
@@ -266,7 +266,7 @@ tenth of a second. This sets a concrete bar for any later quantum-solver
 comparison: on certifiable instances the target is the proven optimum, and on
 larger instances it is the dual bound.
 
-![Figure 3. An optimized discrete-pad layout and its UV response.](../figures/fig18_optimized_layout.png)
+![Figure 3. An optimized discrete-pad layout and its UV response.](figures/fig18_optimized_layout.png)
 
 ### 4.3 Science-case dependence
 
@@ -281,7 +281,7 @@ case.
 | Compact source | 706 | 633.38 | 0.0512 | 0.104 |
 | Extended emission | 505 | 1024.00 | 0.0598 | 0.165 |
 
-![Figure 4. Different science-case weights select different pad subsets.](../figures/fig19_science_case_layouts.png)
+![Figure 4. Different science-case weights select different pad subsets.](figures/fig19_science_case_layouts.png)
 
 A negative result qualifies this and is worth stating, because it determines how
 a science case must be specified to have any effect. Expressing the case as a
@@ -316,7 +316,7 @@ non-monotonic; coverage alone remains insufficient as an imaging criterion.
 | 20% | 5 | 447 | 0.130 |
 | 30% | 7 | 487 | 0.137 |
 
-![Figure 5. Multi-frequency UV filling.](../figures/fig21_multifrequency_gain.png)
+![Figure 5. Multi-frequency UV filling.](figures/fig21_multifrequency_gain.png)
 
 ### 4.5 Multi-epoch reconfiguration
 
@@ -365,7 +365,7 @@ emitting the same model as a coefficient dictionary stores 6.2 million non-zero
 terms instead, which is also the input form expected by standard QUBO solver
 interfaces.
 
-![Figure 6. Multi-epoch coverage versus reconfiguration cost.](../figures/fig22_multiepoch_tradeoff.png)
+![Figure 6. Multi-epoch coverage versus reconfiguration cost.](figures/fig22_multiepoch_tradeoff.png)
 
 ### 4.6 Analytic layout families as references
 

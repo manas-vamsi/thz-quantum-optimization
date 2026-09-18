@@ -1,0 +1,117 @@
+{
+  "conclusion": "reconfiguration substitutes for Earth rotation: 2.7x coverage gain for a 0.2 h window, 1.06x for 6 h, at fixed total integration time",
+  "parameters": {
+    "M": 40,
+    "N": 10,
+    "grid_cells": 24,
+    "seed": 20260916,
+    "total_hours": 6.0
+  },
+  "rows": [
+    {
+      "fill_fraction": 0.1328132714525526,
+      "gain_over_static": 1.0,
+      "moves": 0,
+      "n_baseline_variables": 780,
+      "n_epochs": 1,
+      "n_objective_couplings": 40350,
+      "n_variables_total": 820,
+      "pooled_sum_sq": 65024,
+      "union_cells": 378
+    },
+    {
+      "fill_fraction": 0.06173089258400355,
+      "gain_over_static": 1.0105820105820107,
+      "moves": 8,
+      "n_baseline_variables": 1560,
+      "n_epochs": 2,
+      "n_objective_couplings": 75066,
+      "n_variables_total": 1640,
+      "pooled_sum_sq": 48732,
+      "union_cells": 382
+    },
+    {
+      "fill_fraction": 0.04146559819924506,
+      "gain_over_static": 1.029100529100529,
+      "moves": 26,
+      "n_baseline_variables": 2340,
+      "n_epochs": 3,
+      "n_objective_couplings": 113476,
+      "n_variables_total": 2460,
+      "pooled_sum_sq": 61702,
+      "union_cells": 389
+    },
+    {
+      "fill_fraction": 0.0323947106649896,
+      "gain_over_static": 1.0502645502645502,
+      "moves": 32,
+      "n_baseline_variables": 3120,
+      "n_epochs": 4,
+      "n_objective_couplings": 157621,
+      "n_variables_total": 3280,
+      "pooled_sum_sq": 50768,
+      "union_cells": 397
+    },
+    {
+      "fill_fraction": 0.023842938899574933,
+      "gain_over_static": 1.0687830687830688,
+      "moves": 66,
+      "n_baseline_variables": 4680,
+      "n_epochs": 6,
+      "n_objective_couplings": 261053,
+      "n_variables_total": 4920,
+      "pooled_sum_sq": 58116,
+      "union_cells": 404
+    }
+  ],
+  "window_sweep": [
+    {
+      "cells_T3": 248,
+      "cells_T6": 325,
+      "gain_T6": 2.6639344262295084,
+      "moves_T6": 80,
+      "static_cells": 122,
+      "window_hours": 0.2
+    },
+    {
+      "cells_T3": 268,
+      "cells_T6": 335,
+      "gain_T6": 2.326388888888889,
+      "moves_T6": 74,
+      "static_cells": 144,
+      "window_hours": 0.5
+    },
+    {
+      "cells_T3": 290,
+      "cells_T6": 346,
+      "gain_T6": 1.901098901098901,
+      "moves_T6": 70,
+      "static_cells": 182,
+      "window_hours": 1.0
+    },
+    {
+      "cells_T3": 332,
+      "cells_T6": 373,
+      "gain_T6": 1.492,
+      "moves_T6": 66,
+      "static_cells": 250,
+      "window_hours": 2.0
+    },
+    {
+      "cells_T3": 374,
+      "cells_T6": 398,
+      "gain_T6": 1.1705882352941177,
+      "moves_T6": 62,
+      "static_cells": 340,
+      "window_hours": 4.0
+    },
+    {
+      "cells_T3": 395,
+      "cells_T6": 405,
+      "gain_T6": 1.062992125984252,
+      "moves_T6": 62,
+      "static_cells": 381,
+      "window_hours": 6.0
+    }
+  ]
+}

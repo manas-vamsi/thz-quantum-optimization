@@ -1,0 +1,47 @@
+# Experiment definitions.  Each entry overrides keys of configs/default.yaml.
+#
+# The controlled-comparison rule: within one experiment every configuration
+# shares N, r_min, r_max, wavelength, UV grid, observing geometry and metric
+# definitions.  Only the layout generator changes.
+
+experiments:
+  A:
+    label: N10
+    array:
+      n_antennas: 10
+  B:
+    label: N20
+    array:
+      n_antennas: 20
+  C:
+    label: N50
+    array:
+      n_antennas: 50
+  D:
+    label: N100
+    array:
+      n_antennas: 100
+
+# Layout models compared in every experiment.  "golden" is the reference
+# implementation of the published golden-ratio spiral; the three Fibonacci
+# entries are the distinct constructions defined in docs/fibonacci_vs_golden.md;
+# random and rings are neutral controls.
+layouts:
+  - golden
+  - fibonacci_radial
+  - fibonacci_golden_angle
+  - fibonacci_rational
+  - random
+  - rings
+
+# Toy QUBO example (experiment 05).  Illustrative values, not an instrument.
+toy_qubo:
+  n_pads: 8
+  n_select: 4
+  r_min_m: 20.0
+  r_max_m: 400.0
+  wavelength_m: 0.001
+  grid_cells_sweep: [8, 12, 16, 24, 32, 64, 128, 256]
+  grid_cells_report: 16
+  weightings: [count, shared, radial]
+  penalty_safety_factor: 2.0

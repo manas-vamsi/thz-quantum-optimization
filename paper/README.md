@@ -1,106 +1,140 @@
-# Paper directory
+# Atmosphere-Aware QUBO Formulations for Discrete-Pad Terahertz Interferometric Array Design
 
-Everything needed to read, rebuild, and *verify* the manuscript.
+Manuscript, source code, figures, data and verification suite for the study.
+This directory is self-contained: everything needed to read the paper,
+understand the approach, rerun every experiment and check every number is here.
 
-| file | what it is |
+```
+paper/
+├── manuscript.md              the paper
+├── manuscript.pdf             rendered, six pages, two columns
+├── README.md                  this file: approach, results, how to run
+├── REPRODUCIBILITY.md         which script produced which figure, table and number
+├── build_pdf.py               manuscript.md -> manuscript.pdf
+├── sync_code.py               refresh code/ from the project repository
+├── code/                      the implementation
+│   ├── MANIFEST.md            checksum of every shipped file, and its source commit
+│   ├── src/thz_opt/           library
+│   ├── experiments/           the five scripts cited by the manuscript
+│   ├── tests/                 144 checks on the mathematics
+│   ├── configs/               parameters every experiment reads
+│   └── requirements.txt
+├── figures/                   the six figures used in the manuscript
+└── data/                      the numbers behind every table
+```
+
+---
+
+## 1. The problem
+
+A terahertz interferometer is built on prepared concrete pads. There are `M`
+candidate pads and budget for `N` antennas. Which `N`?
+
+Every *pair* of occupied pads forms one baseline, and each baseline measures one
+Fourier component of the sky. The quality of a layout therefore depends on
+pairs, not on individual pads, and the number of candidate layouts is `C(M,N)` --
+about 10^29 at `M=100, N=50`.
+
+Terahertz adds three constraints that centimetre-wave arrays can largely ignore:
+atmospheric water vapour, tropospheric phase decorrelation that worsens with
+baseline length, and a minimum separation set by dish diameter.
+
+## 2. The approach
+
+**Pairwise structure makes this a natural QUBO.** With `x_i = 1` when pad `i` is
+occupied, a baseline exists exactly when `x_i x_j = 1`, so a quadratic objective
+is the physically correct shape:
+
+```
+H = H_select + H_shadow + H_phase + H_uv
+```
+
+**All physics is precomputed.** Baselines, Earth-rotation UV tracks and per-cell
+occupancy are computed once, offline, and compiled into coefficients. The
+optimiser never runs a simulation.
+
+**The obstruction, and the resolution.** Objectives that compare one baseline
+against another -- UV-track overlap, unique-cell coverage, sidelobe energy --
+involve four pad indices and are therefore *quartic* in `x`, not quadratic. A
+pad-space `Q_ij` cannot hold them.
+
+Introducing one baseline-activation variable per candidate pair, `y_k = x_i x_j`,
+and enforcing that identity with the Rosenberg penalty restores an exact
+quadratic form at a cost of `M + M(M-1)/2` variables. In `y`, the gridded
+sampling-density energy, Cornwell repulsion and target-density matching are
+represented *exactly*; unique-cell coverage is represented by a second-order
+Bonferroni *lower bound*, which is exact unless a cell is covered three or more
+times.
+
+**Atmospheric coherence is the terahertz-specific term** and, usefully, it is
+already quadratic: the decorrelation factor `gamma = exp(-sigma_phi^2/2)`
+depends only on a pad pair, so it enters `Q_ij` directly.
+
+Full derivations: `manuscript.md` §2, and `code/src/thz_opt/qubo/baseline_qubo.py`.
+
+## 3. Results
+
+| Finding | Measurement |
 |---|---|
-| `manuscript.md` | the paper source |
-| `manuscript.pdf` | rendered, 6 pages, two columns (build product, not committed) |
-| `build_pdf.py` | renders the markdown to PDF with ReportLab |
-| `make_submission.py` | packages the paper **with the code that produced it** into one folder or zip |
-| `README.md` | this file: where every number in the paper comes from |
+| Baseline variables beat a pad-only surrogate | selects an exact-coverage optimum at every tested UV resolution; the surrogate misses it at four of eight |
+| Search beats analytic layouts | 763 occupied UV cells against 417 for a golden spiral and 610 for the best analytic reference, same pads and constraints |
+| Heuristics are near-optimal where that can be proven | on a certifiable instance the optimum is 154 cells; simulated annealing attains 154 in 6.3 s against 54.5 s for the certifying solver |
+| Receiver bandwidth is free coverage | +43.2 % occupied cells at 30 % fractional bandwidth, no extra antennas and no extra variables |
+| The science case determines the layout | compact-source and extended-emission weightings share only four of fifteen pads |
+| A preference is not enough | smooth radial weighting barely moves the optimum; only restricting the UV band does |
+| Reconfiguration substitutes for Earth rotation | 2.66x coverage gain for a 0.2 h window, 1.06x for 6 h, at fixed integration time |
+
+The study is a validated classical and QUBO-compatible baseline. It is **not** a
+claim of quantum advantage, and **not** a site-specific array recommendation:
+all pad coordinates and atmospheric constants are synthetic controlled inputs.
+
+## 4. Running it
 
 ```bash
-python paper/build_pdf.py          # manuscript.md -> manuscript.pdf
-python paper/make_submission.py    # self-contained bundle for a reviewer
-```
-
----
-
-## Provenance: every figure and table
-
-Nothing in the manuscript is hand-entered. Each figure and table is written by
-the script named below, which also writes the machine-readable numbers next to
-it. Run the script and the figure and the CSV are both regenerated.
-
-### Figures
-
-| Figure | Shows | Generated by | Data written alongside |
-|---|---|---|---|
-| 1 | Formulation comparison (pad-space vs baseline variables) | `experiments/07_formulation_comparison.py` | `data/results/exp07_formulations.csv` |
-| 2 | Classical optimiser comparison | `experiments/08_optimizer_benchmark.py` | `data/results/exp08_optimizer_benchmark.csv` |
-| 3 | An optimised layout and its UV response | `experiments/08_optimizer_benchmark.py` | `data/results/exp08_summary.json` |
-| 4 | Science-case layouts | `experiments/09_science_cases.py` | `data/results/exp09_science_cases.csv` |
-| 5 | Multi-frequency UV filling | `experiments/09_science_cases.py` | `data/results/exp09_multifrequency.csv` |
-| 6 | Multi-epoch coverage vs reconfiguration cost | `experiments/10_multiepoch.py` | `data/results/exp10_multiepoch.csv` |
-
-### Tables
-
-| Section | Table | Generated by | Data file |
-|---|---|---|---|
-| 4.1 | Baseline-variable fidelity, M=8 N=4 | `07_formulation_comparison.py` | `exp07_formulations.csv` |
-| 4.2 | Optimiser benchmark, M=120 N=20 | `08_optimizer_benchmark.py` | `exp08_optimizer_benchmark.csv` |
-| 4.2.1 | MILP certification vs problem size | `08_optimizer_benchmark.py` | `exp08_certified_instance.csv` |
-| 4.2.1 | Heuristics vs the proven optimum | `08_optimizer_benchmark.py` | `exp08_certified_instance.csv` |
-| 4.3 | Science-case dependence | `09_science_cases.py` | `exp09_science_cases.csv` |
-| 4.3 | Smooth preference vs band restriction | `09_science_cases.py` | `exp09_soft_vs_hard.csv` |
-| 4.4 | Multi-frequency synthesis | `09_science_cases.py` | `exp09_multifrequency.csv` |
-| 4.5 | Multi-epoch reconfiguration | `10_multiepoch.py` | `exp10_multiepoch.csv` |
-| 4.5 | Observing-window sweep | `10_multiepoch.py` | `exp10_window_sweep.csv` |
-| 4.6 | Analytic layout families | `06_layout_shootout.py` | `exp06_shootout.csv` |
-
----
-
-## Which source file implements which claim
-
-| Manuscript section | Claim | Implementation |
-|---|---|---|
-| 2.1 | Baselines, UV coordinates, Earth rotation | `src/thz_opt/interferometry/baselines.py`, `uv.py`, `earth_rotation.py` |
-| 2.2 Eq. (1) | Kolmogorov phase model, decorrelation `gamma` | `src/thz_opt/constraints/coherence.py` |
-| 2.2 Eq. (2) | Fixed count, minimum separation | `src/thz_opt/qubo/objective.py`, `src/thz_opt/constraints/separation.py` |
-| 2.3 Eq. (3) | The quartic UV-overlap obstruction | `src/thz_opt/qubo/coefficients.py` (docstring derivation) |
-| 2.4 Eq. (4) | Rosenberg quadratization | `src/thz_opt/qubo/baseline_qubo.py::build_baseline_qubo` |
-| 2.4 Eq. (5) | Bonferroni coverage bound | `baseline_qubo.py::bonferroni_coverage_terms` |
-| 2.4 Eq. (6) | Gridded sampling-density energy, Parseval | `baseline_qubo.py::sidelobe_energy_terms` |
-| 2.4 | Coherence-weighted objective | `baseline_qubo.py::coherence_weighted_sidelobe_terms` |
-| 3 | MILP certification | `src/thz_opt/optimize/exact.py` |
-| 4.2 | Greedy, local search, annealing | `src/thz_opt/optimize/heuristics.py` |
-| 4.3 | Science-case weights | `src/thz_opt/optimize/science_cases.py` |
-| 4.4 | Multi-frequency `a_ck = sum_f a_ckf` | `src/thz_opt/interferometry/multifrequency.py` |
-| 4.5 Eq. (8) | Multi-epoch, movement cost | `src/thz_opt/qubo/multiepoch.py` |
-| 5 | Scenario mean; cable cost | `src/thz_opt/qubo/robust.py`, `src/thz_opt/constraints/cable.py` |
-
----
-
-## Reproducing the paper from scratch
-
-```bash
+cd paper/code
 pip install -r requirements.txt
-python -m pytest -q                      # 144 checks on the maths itself
 
-cd experiments
-python 06_layout_shootout.py             # Table 4.6
-python 07_formulation_comparison.py      # Figure 1, Table 4.1
-python 08_optimizer_benchmark.py         # Figures 2-3, Tables 4.2, 4.2.1   (~10 min: two MILP solves)
-python 09_science_cases.py               # Figures 4-5, Tables 4.3, 4.4
-python 10_multiepoch.py                  # Figure 6, Tables 4.5
-
-cd ..
-python paper/build_pdf.py                # rebuild the PDF from the new numbers
+python -m pytest                 # 144 checks on the mathematics itself
 ```
 
-Every run is deterministic: layouts are seeded from `configs/default.yaml` and
-the seeds are printed in each script's header. The only source of run-to-run
-variation is MILP wall-clock time, which can change whether a time-limited run
-closes its gap -- which is exactly why §4.2.1 reports the `proven_optimal` flag
-rather than assuming it.
+Then reproduce the manuscript's figures and tables:
 
-Each figure also carries its own generating parameters printed in the corner of
-the image, so a figure separated from this repository still states what made it.
+```bash
+cd experiments
+python 07_formulation_comparison.py     # Figure 1,   Table 4.1
+python 08_optimizer_benchmark.py        # Figures 2-3, Tables 4.2 and 4.2.1
+python 09_science_cases.py              # Figures 4-5, Tables 4.3 and 4.4
+python 10_multiepoch.py                 # Figure 6,   Table 4.5
+python 06_layout_shootout.py            # Table 4.6
+```
 
-## One caveat a reviewer should see immediately
+Experiment 08 takes roughly ten minutes because it runs two mixed-integer
+solves; the others are faster. Every run is deterministic apart from
+mixed-integer wall-clock time, which is why the manuscript reports the solver's
+`proven_optimal` flag rather than assuming optimality.
 
-All candidate pad coordinates and all atmospheric constants in this manuscript
-are synthetic. They are controlled inputs chosen to make the comparisons fair,
-not a site survey. Replacing them with real pad positions and measured phase
-statistics is the stated next step, not an oversight.
+Rebuild the PDF after regenerating figures:
+
+```bash
+python paper/build_pdf.py
+```
+
+## 5. Verifying what is here
+
+`code/MANIFEST.md` lists a checksum for every shipped file and the commit it was
+taken from. To confirm this copy matches the project repository:
+
+```bash
+python paper/sync_code.py --check
+```
+
+`REPRODUCIBILITY.md` maps every figure, table and equation in the manuscript to
+the file that produces or implements it.
+
+## 6. What is still required before submission
+
+Institutional affiliation, correspondence address, coauthor information,
+funding statement, acknowledgements, and a repository DOI. Scientifically: real
+candidate pad coordinates, measured site atmospheric phase statistics to replace
+the assumed constants, and a defined science case from which the UV weighting
+should be derived rather than chosen.
