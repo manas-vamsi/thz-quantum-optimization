@@ -16,3 +16,5 @@ data/generated/*.npz
 # Paper build outputs (regenerate with: python paper/build_pdf.py)
 paper/*.pdf
 paper/preview_*.png
+paper/submission/
+paper/submission_*.zip
