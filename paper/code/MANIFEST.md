@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `f91282c` on 2026-09-18.
+Synchronised from the project repository at commit `843bbb6` on 2026-09-18.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -12,11 +12,16 @@ python paper/sync_code.py --check
 |---|---|---:|
 | `code/configs/default.yaml` | `5d03c8b204c34a69` | 1700 |
 | `code/configs/experiments.yaml` | `9d61a25470c5bdc5` | 1205 |
+| `code/data/external/aca.all.cfg` | `4c1d48465343cb0a` | 1211 |
+| `code/data/external/alma.all.cfg` | `1396bc73e796621e` | 10059 |
+| `code/data/external/SOURCES.md` | `785392ad6b73af2e` | 2559 |
+| `code/data/external/vla.a.cfg` | `e958cbdf312f056f` | 1545 |
 | `code/experiments/06_layout_shootout.py` | `6df6e2a95035faa0` | 11421 |
 | `code/experiments/07_formulation_comparison.py` | `ae1fd7d390211eac` | 8607 |
 | `code/experiments/08_optimizer_benchmark.py` | `758a8c79dc2b2120` | 19450 |
 | `code/experiments/09_science_cases.py` | `bdc94b559264c9d5` | 17146 |
 | `code/experiments/10_multiepoch.py` | `2cdd755021f7cdcb` | 14170 |
+| `code/experiments/11_real_alma.py` | `7e0c7450087d92f3` | 16430 |
 | `code/experiments/common.py` | `6074ef5db54ecc6e` | 6643 |
 | `code/pytest.ini` | `3b3ffd97382ae1ec` | 61 |
 | `code/requirements.txt` | `49a9690806e2926f` | 364 |
@@ -26,6 +31,7 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/arrays/geometries.py` | `f29d30261f1e6b2e` | 11929 |
 | `code/src/thz_opt/arrays/golden_spiral.py` | `7bcd83a5a5a2b756` | 2406 |
 | `code/src/thz_opt/arrays/random_array.py` | `7d0ce673dbcc957f` | 2027 |
+| `code/src/thz_opt/arrays/real_arrays.py` | `11071d5bc91541ea` | 7329 |
 | `code/src/thz_opt/arrays/validation.py` | `57236f8e8a4bd8df` | 1528 |
 | `code/src/thz_opt/constraints/__init__.py` | `e3b0c44298fc1c14` | 0 |
 | `code/src/thz_opt/constraints/cable.py` | `506316e1fae8e5dd` | 3845 |
@@ -70,6 +76,7 @@ python paper/sync_code.py --check
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
 | `code/tests/test_optimize.py` | `019c131fe3eb422a` | 2528 |
 | `code/tests/test_qubo.py` | `a947af5ae1b34591` | 6969 |
+| `code/tests/test_real_arrays.py` | `007aef074c486fb6` | 3845 |
 | `code/tests/test_robust_cable_sparse.py` | `4a8378fd0f020f4d` | 6094 |
 | `code/tests/test_uv.py` | `00bcb1a5f65b6987` | 5035 |
 | `data/exp06_shootout.csv` | `7b7a2b3cf1815451` | 3579 |
@@ -84,11 +91,15 @@ python paper/sync_code.py --check
 | `data/exp10_multiepoch.csv` | `aca128e93630ac47` | 471 |
 | `data/exp10_summary.json` | `e67293c4f4ac329e` | 2944 |
 | `data/exp10_window_sweep.csv` | `2e160e493d8531fd` | 280 |
+| `data/exp11_real_alma.csv` | `06253c7825bed6c7` | 1243 |
+| `data/exp11_summary.json` | `1406b2c3417af1e5` | 8845 |
 | `figures/fig16_formulation_comparison.png` | `a96072f98354724f` | 120249 |
 | `figures/fig17_optimizer_comparison.png` | `43ae55addb5d1c09` | 102214 |
 | `figures/fig18_optimized_layout.png` | `027c2465288440cc` | 94933 |
 | `figures/fig19_science_case_layouts.png` | `dae506d90279c9a9` | 70033 |
 | `figures/fig21_multifrequency_gain.png` | `b0da7cd4e8bfc186` | 82519 |
 | `figures/fig22_multiepoch_tradeoff.png` | `7ae287e4888cdfb2` | 111684 |
+| `figures/fig23_real_alma_pads.png` | `b01dbbb8211caa05` | 67423 |
+| `figures/fig24_real_alma_selection.png` | `f3d5f80cffc00acc` | 65613 |
 
-80 files.
+91 files.

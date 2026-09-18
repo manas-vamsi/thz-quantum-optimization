@@ -4,9 +4,10 @@
 
 > Submission metadata still required: institutional affiliation, correspondence
 > email, ISRO Space Applications Centre coauthor information, funding statement,
-> acknowledgements, and repository DOI. All numerical layouts in this manuscript
-> use controlled synthetic candidate pads; they are not a site-specific build
-> recommendation.
+> acknowledgements, and repository DOI. Section 4.7 uses the published ALMA pad
+> coordinates; the controlled studies in Sections 4.1 to 4.6 use synthetic
+> candidate pads, and atmospheric constants are assumed throughout. This is a
+> methods study, not a site-specific build recommendation.
 
 ## Abstract
 
@@ -31,7 +32,11 @@ reached 763 occupied UV cells, versus 417 for a golden-spiral reference while
 satisfying minimum separation. A multi-frequency simulation increased occupied
 cells by 43.2% over the monochromatic case at 30% fractional bandwidth. This is
 a validated classical and QUBO-compatible baseline, not a claim of quantum
-advantage or a site-specific array design.
+advantage or a site-specific array design. Applied to the 174 published
+twelve-metre ALMA pads, searched selection improves occupied UV cells by 10.1%
+over the best analytic layout snapped to the same pads and by 149% over random
+feasible selection, and optimality is proven for instances up to 40 candidate
+pads on that real geometry.
 
 **Index Terms:** terahertz interferometry; aperture synthesis; UV coverage;
 QUBO; quadratic optimization; quantum annealing; array configuration.
@@ -405,6 +410,66 @@ collapse the sampled position angles onto q directions. The operative property
 is therefore poor rational approximability rather than the golden ratio
 specifically.
 
+### 4.7 Real pad geometry: the published ALMA pad list
+
+Sections 4.1 to 4.6 use synthetic candidate pads so that N, radial extent and
+UV grid can be held fixed across comparisons. This section repeats the selection
+problem on measured geometry: the **174 twelve-metre pads of the ALMA pad list**
+as distributed in the CASA observatory configuration files, at the site's own
+latitude of -23.0229 degrees, observing at 300 GHz over four hours of Earth
+rotation. ALMA itself selects roughly forty antennas from this list each cycle,
+so the problem posed here is the operational one.
+
+The parse is validated against independently published values: the pad list
+gives a maximum baseline of 16.2 km against ALMA's quoted ~16 km, and the same
+loader applied to the VLA A-configuration file -- whose coordinates are
+geocentric and must be rotated into a local frame -- recovers 36.6 km against
+the published ~36 km.
+
+**The shadowing rule is stricter than the real site.** The project's assumed
+limit of 1.5 dish diameters is 18 m for a 12 m dish, but the closest pair of
+real ALMA pads is 15.1 m apart. The rule forbids 43 of 15 051 candidate pairs
+(0.29%). A design rule taken from a general guideline can therefore exclude
+configurations an existing observatory considers buildable, which is an argument
+for deriving it from the dish and elevation limits of the specific instrument.
+
+**Selecting 20 of 174 real pads.** An analytic curve is not a feasible answer on
+a real site, because antennas must stand on pads that exist. Analytic layouts
+are therefore reported twice: as the idealised curve, and snapped to the nearest
+available pads, which is how such a design is actually deployed.
+
+| Selection | Unique UV cells | Peak sidelobe | Longest baseline (km) | Feasible |
+|---|---:|---:|---:|:---:|
+| Reuleaux, idealised curve | 916 | 0.058 | 18.7 | no |
+| Golden spiral, idealised curve | 693 | 0.054 | 18.6 | no |
+| Reuleaux, snapped to real pads | 681 | 0.102 | 15.2 | yes |
+| Golden spiral, snapped to real pads | 463 | 0.107 | 15.2 | yes |
+| Best of 16 random feasible selections | 301 | 0.125 | 14.4 | yes |
+| **Searched (greedy, local search, annealing)** | **750** | 0.076 | 16.2 | yes |
+
+Among selections the site can actually build, search improves on the best
+snapped analytic layout by 10.1%, on the snapped golden spiral by 62.0%, and on
+random feasible selection by 149%. The idealised Reuleaux curve scores higher
+than any of them, at 916 cells, but places antennas where no pad exists; the gap
+between 916 and 750 is the cost the real pad field imposes, and it is not
+recoverable by choosing a better curve.
+
+**Certification improves on real geometry.** Proving optimality was harder on
+synthetic pads than it is here: on the real pad field the optimum is proven for
+M=24, N=8 in 27 s and for M=40, N=10 in 57 s, whereas the synthetic instance at
+M=40 did not close within 600 s. Real pad fields are clustered rather than
+uniformly scattered, which appears to tighten the linear relaxation.
+
+**Coherence at the real site.** Applying the phase model at 300 GHz to the
+searched layout, with an uncorrected troposphere 99% of its baselines retain
+less than half their coherence; at a residual factor of 0.1 after phase
+referencing, none do. The geometry here is measured, but these phase constants
+are not, so this is a sensitivity statement rather than a site prediction.
+
+![Figure 7. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
+
+![Figure 8. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
+
 ## 5. Discussion
 
 Baseline activation variables are the central modeling choice. They trade
@@ -431,12 +496,15 @@ minimum spanning tree over the selected pads is a global property of the set and
 cannot; since a star is itself a spanning tree, the linear term is an upper
 bound on the true cost and never flatters a layout.
 
-The present work has deliberate limitations: synthetic candidate pads and
-atmospheric parameters; no site-calibrated kappa; coplanar geometry; no w term,
-primary beam, noise, time/bandwidth smearing, polarization, mosaicking, or
-end-to-end reconstruction. The next paper stage must replace these assumptions
-with a defined site, instrument, science case, and measured atmospheric phase
-statistics.
+The present work has deliberate limitations. Section 4.7 removes the largest
+one by using measured pad coordinates, dish diameter and site latitude, but the
+controlled studies of Sections 4.1 to 4.6 still use synthetic pad fields, and
+the atmospheric parameters are assumed everywhere: there is no site-calibrated
+residual factor kappa and no measured phase structure function. The model is
+coplanar, with no w term, primary beam, noise, time or bandwidth smearing,
+polarization, mosaicking, or end-to-end reconstruction. The next stage must add
+measured atmospheric phase statistics and a defined science case from which the
+UV weighting is derived rather than chosen.
 
 ## 6. Conclusion
 
@@ -473,13 +541,22 @@ Rendering this manuscript to PDF: `python paper/build_pdf.py`.
 
 ## Data availability
 
-**No external or observational data were used in this study.** Every number in
-this manuscript is generated by the code accompanying it. Candidate pad
-coordinates are synthetic layouts produced from documented generators with fixed
-seeds; atmospheric parameters are typical published values for a high, dry site,
-not measurements of any particular location. This is a deliberate choice that
-makes the comparisons controlled, and it is also the principal limitation of the
-work.
+**Real published data.** Section 4.7 uses the ALMA, ACA and VLA antenna
+configuration files distributed with the NRAO CASA package, which give measured
+pad coordinates, dish diameters and station identifiers. They are redistributed
+unmodified under `data/external/`, with provenance, retrieval date and
+verification against independently published baseline extents recorded in
+`data/external/SOURCES.md`.
+
+**Synthetic inputs, stated plainly.** Sections 4.1 to 4.6 use synthetic
+candidate pads generated from documented layout functions with fixed seeds, so
+that N, radial extent and UV grid can be held constant across comparisons.
+Atmospheric parameters are assumed throughout the manuscript: precipitable water
+vapour and the phase structure function use typical published values for a high,
+dry site rather than a measured series for any location or season. These remain
+the principal limitation of the work.
+
+Every derived number is generated by the accompanying code.
 
 The generated data behind every table are distributed with the manuscript under
 `data/`:

@@ -39,6 +39,7 @@ EXPERIMENTS = [
     "08_optimizer_benchmark.py",
     "09_science_cases.py",
     "10_multiepoch.py",
+    "11_real_alma.py",
 ]
 
 FIGURES = [
@@ -48,6 +49,8 @@ FIGURES = [
     "fig19_science_case_layouts.png",
     "fig21_multifrequency_gain.png",
     "fig22_multiepoch_tradeoff.png",
+    "fig23_real_alma_pads.png",
+    "fig24_real_alma_selection.png",
 ]
 
 DATA = [
@@ -63,6 +66,8 @@ DATA = [
     "exp10_multiepoch.csv",
     "exp10_window_sweep.csv",
     "exp10_summary.json",
+    "exp11_real_alma.csv",
+    "exp11_summary.json",
 ]
 
 PYTEST_INI = """[pytest]
@@ -97,6 +102,9 @@ def planned() -> list:
     for p in sorted((ROOT / "configs").glob("*.yaml")):
         pairs.append((p, CODE / "configs" / p.name))
     pairs.append((ROOT / "requirements.txt", CODE / "requirements.txt"))
+    # real, published pad coordinates and their provenance travel with the paper
+    for name in ("alma.all.cfg", "aca.all.cfg", "vla.a.cfg", "SOURCES.md"):
+        pairs.append((ROOT / "data" / "external" / name, CODE / "data" / "external" / name))
     for name in FIGURES:
         pairs.append((ROOT / "figures" / name, HERE / "figures" / name))
     for name in DATA:
