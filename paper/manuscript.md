@@ -5,9 +5,10 @@
 > Submission metadata still required: institutional affiliation, correspondence
 > email, ISRO Space Applications Centre coauthor information, funding statement,
 > acknowledgements, and repository DOI. Section 4.7 uses the published ALMA pad
-> coordinates; the controlled studies in Sections 4.1 to 4.6 use synthetic
-> candidate pads, and atmospheric constants are assumed throughout. This is a
-> methods study, not a site-specific build recommendation.
+> coordinates together with measured phase-stability and water-vapour statistics
+> for that site; the controlled studies in Sections 4.1 to 4.6 use synthetic
+> candidate pads. This is a methods study, not a site-specific build
+> recommendation.
 
 ## Abstract
 
@@ -36,7 +37,9 @@ advantage or a site-specific array design. Applied to the 174 published
 twelve-metre ALMA pads, searched selection improves occupied UV cells by 10.1%
 over the best analytic layout snapped to the same pads and by 149% over random
 feasible selection, and optimality is proven for instances up to 40 candidate
-pads on that real geometry.
+pads on that real geometry. Using measured phase-stability statistics for the
+same site, water-vapour-radiometer correction separates an array in which 98% of
+baselines fall below half coherence at 300 GHz from one in which none does.
 
 **Index Terms:** terahertz interferometry; aperture synthesis; UV coverage;
 QUBO; quadratic optimization; quantum annealing; array configuration.
@@ -88,10 +91,27 @@ per-baseline tables; it does not rerun interferometric simulation during search.
 The atmospheric phase model is
 
     sigma_phi(b) = 2*pi*sigma_path(b)/lambda
-    gamma(b) = exp[-sigma_phi(b)^2/2].
+    gamma(b) = exp[-sigma_phi(b)^2/2],
 
-Here gamma is the visibility decorrelation factor. With a residual
-phase-referencing factor kappa in sigma_path, the coherence penalty is
+with sigma_path following a broken power law in baseline length. The constants
+are measured rather than assumed. From over 17 000 ALMA observations analysed in
+ALMA Memo 624 [18], the median path-length RMS on a 1 km baseline over a 120 s
+timescale is 200 um without water-vapour-radiometer correction, 115 um for the
+subset below the 1.24 mm median PWV, and 70 um with correction applied at wind
+speeds below 10 m/s, rising to 140 um above. The structure-function exponents,
+from the spatial structure function of Matsushita et al. as adopted in that
+memo, are 0.65 below a 1 km baseline and 0.22 above it without correction, and
+0.60 and 0.29 with it.
+
+These measured exponents are **shallower than the idealised Kolmogorov values**
+of 5/6 and 1/3, so an analysis using textbook constants overstates how quickly
+coherence degrades with baseline length. As a check that the implementation
+reproduces the measured structure function rather than merely resembling it, the
+memo's own stated scaling factors between its summary baselines -- 1.51 from
+500 to 1000 m, 1.59 from 1000 to 5000 m and 1.22 from 5000 to 10 000 m -- are
+recovered to 1.516, 1.595 and 1.223.
+
+Here gamma is the visibility decorrelation factor and the coherence penalty is
 
     H_phase = lambda_phase * sum_(i<j) (1-gamma_ij) x_i x_j.       (1)
 
@@ -460,11 +480,30 @@ M=24, N=8 in 27 s and for M=40, N=10 in 57 s, whereas the synthetic instance at
 M=40 did not close within 600 s. Real pad fields are clustered rather than
 uniformly scattered, which appears to tighten the linear relaxation.
 
-**Coherence at the real site.** Applying the phase model at 300 GHz to the
-searched layout, with an uncorrected troposphere 99% of its baselines retain
-less than half their coherence; at a residual factor of 0.1 after phase
-referencing, none do. The geometry here is measured, but these phase constants
-are not, so this is a sensitivity statement rather than a site prediction.
+**Coherence at the real site, with measured constants.** Applying the phase
+model at 300 GHz to the searched layout, using the four measured observing
+regimes of ALMA Memo 624:
+
+| Observing condition | Path RMS at 1 km | Mean coherence | Baselines below 0.5 |
+|---|---:|---:|---:|
+| No WVR correction | 200 um | 0.174 | 98% |
+| No WVR, below median PWV | 115 um | 0.544 | 39% |
+| WVR corrected, wind < 10 m/s | 70 um | 0.738 | 0% |
+| WVR corrected, wind > 10 m/s | 140 um | 0.316 | 90% |
+
+Water-vapour-radiometer correction is therefore the difference between an array
+in which almost every baseline is incoherent and one in which none falls below
+half coherence, and wind speed alone moves the result across most of that range.
+An earlier version of this analysis assumed a 1 mm path RMS at 1 km, fourteen
+times the measured value, and concluded that long baselines were essentially
+unusable at 300 GHz; the measured constants do not support that conclusion. This
+is a direct illustration of why the atmospheric constants had to be measured
+rather than assumed.
+
+Measured precipitable water vapour for the site provides the accompanying
+opacity context: medians of 3.05 mm in January, 0.88 mm in June, 0.70 mm in
+August and 1.64 mm in December [18], against a twenty-year year-round median
+near 1 mm [19].
 
 ![Figure 7. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
 
@@ -496,15 +535,21 @@ minimum spanning tree over the selected pads is a global property of the set and
 cannot; since a star is itself a spanning tree, the linear term is an upper
 bound on the true cost and never flatters a layout.
 
-The present work has deliberate limitations. Section 4.7 removes the largest
-one by using measured pad coordinates, dish diameter and site latitude, but the
-controlled studies of Sections 4.1 to 4.6 still use synthetic pad fields, and
-the atmospheric parameters are assumed everywhere: there is no site-calibrated
-residual factor kappa and no measured phase structure function. The model is
-coplanar, with no w term, primary beam, noise, time or bandwidth smearing,
-polarization, mosaicking, or end-to-end reconstruction. The next stage must add
-measured atmospheric phase statistics and a defined science case from which the
-UV weighting is derived rather than chosen.
+The present work has deliberate limitations, though fewer than at the outset.
+Section 4.7 uses measured pad coordinates, dish diameter, site latitude, phase
+structure function and water-vapour statistics, so the geometry and the
+atmosphere there are both real. The controlled studies of Sections 4.1 to 4.6
+still use synthetic pad fields, by design, so that N, extent and UV grid can be
+held fixed across comparisons.
+
+What remains assumed is temporal rather than physical: the phase constants are
+medians over thousands of observations at a 120 s timescale, so they describe the
+site rather than a particular night, and the source memo notes that its sample
+omits the very worst conditions, in which no observation was attempted. The
+model is coplanar, with no w term, primary beam, noise, time or bandwidth
+smearing, polarization, mosaicking, or end-to-end reconstruction. The remaining
+scientific gap is a defined science case from which the UV weighting is derived
+rather than chosen.
 
 ## 6. Conclusion
 
@@ -548,13 +593,17 @@ unmodified under `data/external/`, with provenance, retrieval date and
 verification against independently published baseline extents recorded in
 `data/external/SOURCES.md`.
 
+Measured atmospheric parameters for the same site are taken from ALMA Memo 624
+[18] -- phase RMS as path-length variation on 500, 1000, 5000 and 10 000 m
+baselines, and monthly PWV percentiles -- and from the twenty-year PWV study of
+Cortés et al. [19]. They are tabulated with their sources in
+`code/src/thz_opt/constraints/atmosphere_data.py`, and the implementation is
+checked against the memo's own published scaling factors.
+
 **Synthetic inputs, stated plainly.** Sections 4.1 to 4.6 use synthetic
 candidate pads generated from documented layout functions with fixed seeds, so
-that N, radial extent and UV grid can be held constant across comparisons.
-Atmospheric parameters are assumed throughout the manuscript: precipitable water
-vapour and the phase structure function use typical published values for a high,
-dry site rather than a measured series for any location or season. These remain
-the principal limitation of the work.
+that N, radial extent and UV grid can be held constant across comparisons. Those
+sections are controlled studies of the formulation, not site models.
 
 Every derived number is generated by the accompanying code.
 
@@ -675,4 +724,11 @@ pp. 1075-1078, 2000, doi: 10.1109/8.876326.
 
 [17] M. Ayodele, "Penalty weights in QUBO formulations: permutation problems,"
 2022, arXiv:2206.11040.
+
+[18] L. T. Maud et al., "Updates to ALMA site properties: using the ESO-Allegro
+phase RMS database," ALMA Memo 624, 2023, arXiv:2304.08318.
+
+[19] F. Cortés et al., "Twenty years of precipitable water vapor measurements in
+the Chajnantor area," *Astronomy and Astrophysics*, vol. 640, A126, 2020,
+doi: 10.1051/0004-6361/202037784.
 

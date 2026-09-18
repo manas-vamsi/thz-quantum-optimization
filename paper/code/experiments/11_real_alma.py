@@ -3,8 +3,9 @@
 Every other experiment here places candidate pads with a random generator. This
 one uses the **actual 174 twelve-metre pads on the Chajnantor plateau**, as
 distributed in the CASA observatory configuration files, at ALMA's real
-latitude. The geometry, the dish diameter and the site are measured; only the
-atmospheric constants remain assumed.
+latitude, with the measured phase-stability constants for that site. Geometry,
+dish diameter, site coordinates, precipitable water vapour and phase structure
+function are all measured quantities here.
 
 That makes the comparison concrete in a way a synthetic pad field cannot be:
 ALMA itself selects roughly 40-50 antennas from this pad list each cycle, which
@@ -16,7 +17,8 @@ Reported:
    from the project note is consistent with it.
 2. Searched selections against the analytic reference layouts, on real pads.
 3. Certification: how large an instance can be proven optimal on real geometry.
-4. Coherence at ALMA's own site latitude and a terahertz observing frequency.
+4. Coherence at ALMA's own site latitude and a terahertz observing frequency, using the measured
+   phase-stability constants for the site.
 
 Outputs
 -------
@@ -48,6 +50,11 @@ from common import (  # noqa: E402
 from thz_opt.arrays.geometries import reuleaux_layout
 from thz_opt.arrays.golden_spiral import golden_spiral_layout
 from thz_opt.arrays.real_arrays import REAL_SITES, load_cfg
+from thz_opt.constraints.atmosphere_data import (
+    ALMA_PHASE,
+    ALMA_PWV_SUMMARY,
+    monthly_pwv,
+)
 from thz_opt.constraints.coherence import CoherenceConfig, coherence_summary
 from thz_opt.constraints.separation import SeparationConfig, check_minimum_separation, shadow_pairs
 from thz_opt.interferometry.earth_rotation import ObservationConfig, layout_to_uv_tracks
@@ -284,14 +291,24 @@ def main() -> None:
               f"bound {ex.get('upper_bound')}, proven={ex['proven_optimal']}, {dt:.0f}s")
 
     # ---- 4. coherence at the real site ----------------------------------
-    print(f"\n  [4] atmospheric coherence at {FREQ_HZ/1e9:.0f} GHz on this pad field")
+    print(f"\n  [4] atmospheric coherence at {FREQ_HZ/1e9:.0f} GHz, measured constants")
+    print(f"      {'observing condition':<22}{'sigma(1km)':>12}{'mean gamma':>12}"
+          f"{'below 0.5':>11}")
     coh = {}
-    for kappa in (1.0, 0.2, 0.1):
-        c = coherence_summary(pads[best_real.indices()], lam, CoherenceConfig(kappa=kappa))
-        coh[kappa] = c
-        print(f"      residual kappa={kappa:<4} mean coherence {c['coherence_mean']:.3f}, "
-              f"{100*c['fraction_below_0p5']:.0f} % of baselines below 0.5")
-    print("      (the phase constants remain assumed; only the geometry is measured)")
+    for cond in ("uncorrected", "uncorrected_low_pwv", "wvr_corrected",
+                 "wvr_corrected_windy"):
+        cc = CoherenceConfig.from_measured(cond)
+        c = coherence_summary(pads[best_real.indices()], lam, cc)
+        coh[cond] = c
+        print(f"      {cond:<22}{cc.sigma_1km_m*1e6:>9.0f} um{c['coherence_mean']:>12.3f}"
+              f"{100*c['fraction_below_0p5']:>10.0f} %")
+    print(f"      source: {ALMA_PHASE['wvr_corrected']['source']}")
+
+    pwv = {m: monthly_pwv(m) for m in ("Jan", "Jun", "Aug", "Dec")}
+    print("\n      measured PWV medians (mm): " +
+          ", ".join(f"{m} {v}" for m, v in pwv.items()) +
+          f"  [{ALMA_PWV_SUMMARY['span_years']}-year year-round median "
+          f"{ALMA_PWV_SUMMARY['median_year_round_mm']} mm]")
 
     save_csv([{k: v for k, v in r.items() if k != "selection"} for r in rows],
              RESULTS / "exp11_real_alma.csv")
@@ -299,7 +316,9 @@ def main() -> None:
                "n_pads": M, "n_select": N_SELECT, "frequency_hz": FREQ_HZ,
                "observation": obs.as_dict(), "forbidden_pairs": n_forbidden,
                "rows": rows, "certification": cert,
-               "coherence": {str(k): v for k, v in coh.items()},
+               "coherence": coh,
+               "pwv_measured_mm": {m: monthly_pwv(m) for m in
+                                   ("Jan", "Jun", "Aug", "Dec")},
                "selected_pads": [pads_cfg.names[i] for i in best_real.indices()]},
               RESULTS / "exp11_summary.json")
 

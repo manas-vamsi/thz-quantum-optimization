@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `843bbb6` on 2026-09-18.
+Synchronised from the project repository at commit `7e6ea41` on 2026-09-18.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -14,14 +14,14 @@ python paper/sync_code.py --check
 | `code/configs/experiments.yaml` | `9d61a25470c5bdc5` | 1205 |
 | `code/data/external/aca.all.cfg` | `4c1d48465343cb0a` | 1211 |
 | `code/data/external/alma.all.cfg` | `1396bc73e796621e` | 10059 |
-| `code/data/external/SOURCES.md` | `785392ad6b73af2e` | 2559 |
+| `code/data/external/SOURCES.md` | `5692346fba0036dd` | 4015 |
 | `code/data/external/vla.a.cfg` | `e958cbdf312f056f` | 1545 |
 | `code/experiments/06_layout_shootout.py` | `6df6e2a95035faa0` | 11421 |
 | `code/experiments/07_formulation_comparison.py` | `ae1fd7d390211eac` | 8607 |
 | `code/experiments/08_optimizer_benchmark.py` | `758a8c79dc2b2120` | 19450 |
 | `code/experiments/09_science_cases.py` | `bdc94b559264c9d5` | 17146 |
 | `code/experiments/10_multiepoch.py` | `2cdd755021f7cdcb` | 14170 |
-| `code/experiments/11_real_alma.py` | `7e0c7450087d92f3` | 16430 |
+| `code/experiments/11_real_alma.py` | `beeaff0623433a10` | 17288 |
 | `code/experiments/common.py` | `6074ef5db54ecc6e` | 6643 |
 | `code/pytest.ini` | `3b3ffd97382ae1ec` | 61 |
 | `code/requirements.txt` | `49a9690806e2926f` | 364 |
@@ -34,8 +34,9 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/arrays/real_arrays.py` | `11071d5bc91541ea` | 7329 |
 | `code/src/thz_opt/arrays/validation.py` | `57236f8e8a4bd8df` | 1528 |
 | `code/src/thz_opt/constraints/__init__.py` | `e3b0c44298fc1c14` | 0 |
+| `code/src/thz_opt/constraints/atmosphere_data.py` | `55d9f82fb293ce2c` | 6800 |
 | `code/src/thz_opt/constraints/cable.py` | `506316e1fae8e5dd` | 3845 |
-| `code/src/thz_opt/constraints/coherence.py` | `2e574ee45464e78b` | 6329 |
+| `code/src/thz_opt/constraints/coherence.py` | `d55a2375957c31c2` | 9308 |
 | `code/src/thz_opt/constraints/phase.py` | `5425e803066341d0` | 5293 |
 | `code/src/thz_opt/constraints/pwv.py` | `cd9b4254f9c9dbee` | 2404 |
 | `code/src/thz_opt/constraints/separation.py` | `992653d9252b5a0b` | 2397 |
@@ -70,7 +71,7 @@ python paper/sync_code.py --check
 | `code/tests/test_arrays.py` | `4140cb46ac58e48b` | 3659 |
 | `code/tests/test_baseline_qubo.py` | `991c8853c68316d0` | 9226 |
 | `code/tests/test_baselines.py` | `ed6032641f46f51b` | 2116 |
-| `code/tests/test_coherence.py` | `c40298b4062e5997` | 4014 |
+| `code/tests/test_coherence.py` | `1ca3ca70be3bedf3` | 6361 |
 | `code/tests/test_extensions.py` | `4b91a71bc2cbb436` | 9752 |
 | `code/tests/test_geometries.py` | `7513a8ab9a7738b1` | 6444 |
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
@@ -91,8 +92,8 @@ python paper/sync_code.py --check
 | `data/exp10_multiepoch.csv` | `aca128e93630ac47` | 471 |
 | `data/exp10_summary.json` | `e67293c4f4ac329e` | 2944 |
 | `data/exp10_window_sweep.csv` | `2e160e493d8531fd` | 280 |
-| `data/exp11_real_alma.csv` | `06253c7825bed6c7` | 1243 |
-| `data/exp11_summary.json` | `1406b2c3417af1e5` | 8845 |
+| `data/exp11_real_alma.csv` | `6c07f695787a5eb2` | 1244 |
+| `data/exp11_summary.json` | `990a31683a9d9953` | 10208 |
 | `figures/fig16_formulation_comparison.png` | `a96072f98354724f` | 120249 |
 | `figures/fig17_optimizer_comparison.png` | `43ae55addb5d1c09` | 102214 |
 | `figures/fig18_optimized_layout.png` | `027c2465288440cc` | 94933 |
@@ -102,4 +103,4 @@ python paper/sync_code.py --check
 | `figures/fig23_real_alma_pads.png` | `b01dbbb8211caa05` | 67423 |
 | `figures/fig24_real_alma_selection.png` | `f3d5f80cffc00acc` | 65613 |
 
-91 files.
+92 files.

@@ -8,20 +8,32 @@ the pad-selection variables** (the graph condition was not).
 
 The model
 ---------
-Tropospheric water vapour follows Kolmogorov turbulence, so the RMS excess path
-length on a baseline of length ``b`` follows a broken power law (Carilli &
-Holdaway 1999, Radio Science 34, 817):
+Tropospheric water vapour produces an excess path length whose RMS follows a
+broken power law in baseline length (Carilli & Holdaway 1999, Radio Science 34,
+817):
 
     sigma_path(b) = kappa * sigma_1km * (b / 1 km) ** alpha
 
-    alpha = 5/6   for b <~ L_3D      (3D turbulence, L_3D ~ 0.5-2 km)
-    alpha = 1/3   for L_3D <~ b <~ L_out   (2D turbulence)
-    saturated     for b >~ L_out     (outer scale, ~5-10 km)
+The constants used here are **measured at the ALMA site**, from over 17 000
+observations analysed in ALMA Memo 624 (Maud et al. 2023):
 
-with the power law made continuous at each breakpoint.  ``kappa <= 1`` is the
-residual factor left after phase referencing or water-vapour radiometry; at
-ALMA this residual is large at high frequency (>200 um path on 10 km baselines),
-so ``kappa`` is not a small number and should be measured, not assumed.
+    sigma_1km = 70 um   (WVR corrected, wind < 10 m/s, 120 s timescale)
+              = 140 um  (WVR corrected, wind > 10 m/s)
+              = 200 um  (no WVR correction, median of all observations)
+              = 115 um  (no WVR, below the 1.24 mm median PWV)
+
+    alpha = 0.60 below a 1 km baseline, 0.29 above   (WVR corrected)
+          = 0.65 below,                  0.22 above  (uncorrected)
+
+The exponents are from the spatial structure function of Matsushita et al.
+(2017) as adopted in that memo. They are notably **shallower than the idealised
+Kolmogorov values** of 5/6 and 1/3: using the textbook numbers overstates how
+fast coherence degrades with baseline length. No saturation is seen within
+ALMA's 16 km extent, so the outer-scale branch is disabled by default.
+
+``kappa`` remains available as a multiplier for exploring hypothetical extra
+correction, but it is 1.0 by default because the correction is already in the
+measured numbers.
 
 The RMS phase is ``sigma_phi = 2 pi sigma_path / lambda``, and for Gaussian
 phase errors the measured visibility amplitude is reduced by the standard
@@ -36,9 +48,11 @@ Because it depends only on the pair, the penalty
 
 is exactly quadratic -- one entry per ``Q_ij``, no auxiliary variables.
 
-Everything here is a *model*.  The constants are typical values for a good
-high site, not measurements of any particular site, and they are exposed as
-parameters for that reason.
+The model form is standard; the constants are measured at one site (ALMA) and
+should be replaced for any other. What remains unmeasured is temporal: these are
+medians over thousands of observations at a 120 s timescale, so they describe
+the site rather than a particular night, and the source memo notes its sample
+omits the very worst conditions, in which no observation was attempted.
 """
 
 from __future__ import annotations
@@ -63,27 +77,65 @@ __all__ = [
 class CoherenceConfig:
     """Parameters of the phase structure function.
 
-    Defaults are order-of-magnitude values for a good high-altitude site; they
-    are not a measurement of any specific site.
+    The defaults are the **measured** ALMA values, not textbook constants:
+    a median path RMS of 70 um on a 1 km baseline over 120 s with
+    water-vapour-radiometer correction applied, and structure-function
+    exponents of 0.60 below the 1 km break and 0.29 above it. Source and the
+    other measured observing conditions are in
+    :mod:`thz_opt.constraints.atmosphere_data`; build a config for any of them
+    with :meth:`from_measured`.
+
+    Two things are worth noting about the measured exponents. They are
+    shallower than the idealised Kolmogorov values of 5/6 and 1/3, so an
+    analysis using the textbook numbers overestimates how quickly coherence is
+    lost with baseline length. And the measured data show no saturation within
+    ALMA's 16 km extent, so ``l_out_m`` defaults beyond it and the outer-scale
+    branch is inactive unless deliberately enabled.
     """
 
-    sigma_1km_m: float = 1.0e-3      # RMS path on a 1 km baseline, metres
-    alpha_3d: float = 5.0 / 6.0      # 3D Kolmogorov exponent
-    alpha_2d: float = 1.0 / 3.0      # 2D exponent above the layer thickness
-    l_3d_m: float = 1000.0           # 3D -> 2D breakpoint
-    l_out_m: float = 6000.0          # outer scale; saturates beyond this
-    kappa: float = 1.0               # residual after phase referencing / WVR
+    sigma_1km_m: float = 70.0e-6     # RMS path on a 1 km baseline, metres
+    alpha_3d: float = 0.60           # measured exponent below the break
+    alpha_2d: float = 0.29           # measured exponent above the break
+    l_3d_m: float = 1000.0           # measured break scale
+    l_out_m: float = 20000.0         # no saturation measured within ALMA's extent
+    kappa: float = 1.0               # extra residual factor, 1.0 = as measured
+
+    #: set when the constants came from :meth:`from_measured`
+    condition: str = "wvr_corrected"
+    measured: bool = True
+
+    @classmethod
+    def from_measured(cls, condition: str = "wvr_corrected", kappa: float = 1.0):
+        """Config from the measured ALMA phase conditions.
+
+        ``condition`` selects one of the observing regimes reported in ALMA
+        Memo 624 -- ``uncorrected``, ``uncorrected_low_pwv``, ``wvr_corrected``
+        or ``wvr_corrected_windy``. ``kappa`` scales the measured path RMS and
+        exists only to explore hypothetical further correction; leave it at 1.0
+        to use the site as measured.
+        """
+        from .atmosphere_data import BREAK_SCALE_M, phase_conditions
+
+        c = phase_conditions(condition)
+        return cls(sigma_1km_m=c["sigma_1km_m"], alpha_3d=c["alpha_short"],
+                   alpha_2d=c["alpha_long"], l_3d_m=BREAK_SCALE_M,
+                   l_out_m=20000.0, kappa=kappa, condition=condition,
+                   measured=True)
 
     def as_dict(self) -> dict:
         return {
             "sigma_1km_m": self.sigma_1km_m,
+            "sigma_1km_um": self.sigma_1km_m * 1e6,
             "alpha_3d": self.alpha_3d,
             "alpha_2d": self.alpha_2d,
             "l_3d_m": self.l_3d_m,
             "l_out_m": self.l_out_m,
             "kappa": self.kappa,
-            "model": "Kolmogorov broken power law + Gaussian decorrelation",
-            "constants_measured": False,
+            "condition": self.condition,
+            "model": "broken power law with measured exponents "
+                     "+ Gaussian decorrelation",
+            "constants_measured": self.measured,
+            "source": "ALMA Memo 624 (Maud et al. 2023), arXiv:2304.08318",
         }
 
 

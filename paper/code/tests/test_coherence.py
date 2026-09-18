@@ -24,13 +24,47 @@ def test_path_rms_matches_the_reference_point():
 
 
 def test_path_rms_exponents_in_each_regime():
-    cfg = CoherenceConfig(l_3d_m=1000.0, l_out_m=6000.0)
-    # 3D branch: doubling b multiplies path by 2**(5/6)
-    assert path_rms(200.0, cfg) / path_rms(100.0, cfg) == pytest.approx(2 ** (5 / 6))
-    # 2D branch: doubling b multiplies path by 2**(1/3)
-    assert path_rms(4000.0, cfg) / path_rms(2000.0, cfg) == pytest.approx(2 ** (1 / 3))
-    # saturated beyond the outer scale
-    assert path_rms(20000.0, cfg) == pytest.approx(path_rms(6000.0, cfg))
+    """The measured ALMA exponents, not the idealised Kolmogorov ones."""
+    cfg = CoherenceConfig.from_measured("wvr_corrected")
+    assert path_rms(200.0, cfg) / path_rms(100.0, cfg) == pytest.approx(2 ** 0.60)
+    assert path_rms(4000.0, cfg) / path_rms(2000.0, cfg) == pytest.approx(2 ** 0.29)
+
+    uncorrected = CoherenceConfig.from_measured("uncorrected")
+    assert path_rms(200.0, uncorrected) / path_rms(100.0, uncorrected) == pytest.approx(2 ** 0.65)
+    assert path_rms(4000.0, uncorrected) / path_rms(2000.0, uncorrected) == pytest.approx(2 ** 0.22)
+
+    # saturation is available but switched off by default, since none is
+    # measured within ALMA's 16 km extent
+    sat = CoherenceConfig(l_3d_m=1000.0, l_out_m=6000.0)
+    assert path_rms(20000.0, sat) == pytest.approx(path_rms(6000.0, sat))
+
+
+def test_model_reproduces_the_published_scaling_factors():
+    """ALMA Memo 624 states the factors used to scale between its summary
+    baselines. Recovering them is the check that this implementation matches
+    the measured structure function rather than merely resembling it."""
+    cfg = CoherenceConfig.from_measured("wvr_corrected")
+    for short, long_, published in ((500.0, 1000.0, 1.51),
+                                    (1000.0, 5000.0, 1.59),
+                                    (5000.0, 10000.0, 1.22)):
+        assert path_rms(long_, cfg) / path_rms(short, cfg) == pytest.approx(
+            published, abs=0.02)
+
+
+def test_measured_anchor_values():
+    """Each condition must reproduce its published 1 km path RMS."""
+    for condition, micron in (("wvr_corrected", 70.0), ("wvr_corrected_windy", 140.0),
+                              ("uncorrected", 200.0), ("uncorrected_low_pwv", 115.0)):
+        cfg = CoherenceConfig.from_measured(condition)
+        assert path_rms(1000.0, cfg) * 1e6 == pytest.approx(micron)
+
+
+def test_measured_exponents_are_shallower_than_kolmogorov():
+    """A real consequence: textbook constants overstate coherence loss."""
+    measured = CoherenceConfig.from_measured("wvr_corrected")
+    textbook = CoherenceConfig(sigma_1km_m=measured.sigma_1km_m,
+                               alpha_3d=5 / 6, alpha_2d=1 / 3)
+    assert path_rms(10000.0, textbook) > path_rms(10000.0, measured)
 
 
 def test_path_rms_is_continuous_at_the_breakpoints():
@@ -62,13 +96,14 @@ def test_decorrelation_bounds_and_monotonicity():
     assert decorrelation_factor(0.0, LAM) == pytest.approx(1.0)
 
 
-def test_correction_factor_restores_coherence():
-    """kappa < 1 (phase referencing / WVR) must increase the surviving coherence."""
-    b = 1000.0
-    uncorrected = decorrelation_factor(b, LAM, CoherenceConfig(kappa=1.0))
-    corrected = decorrelation_factor(b, LAM, CoherenceConfig(kappa=0.1))
-    assert corrected > uncorrected
-    assert corrected > 0.5
+def test_wvr_correction_improves_measured_coherence():
+    """The measured effect of water-vapour-radiometer correction, at 300 GHz."""
+    b = 5000.0
+    raw = decorrelation_factor(b, LAM, CoherenceConfig.from_measured("uncorrected"))
+    wvr = decorrelation_factor(b, LAM, CoherenceConfig.from_measured("wvr_corrected"))
+    windy = decorrelation_factor(b, LAM, CoherenceConfig.from_measured("wvr_corrected_windy"))
+    assert wvr > windy > raw
+    assert wvr > 0.5          # a 5 km baseline stays usable after correction
 
 
 def test_longer_wavelength_is_more_forgiving():
@@ -92,11 +127,19 @@ def test_penalty_grows_with_baseline_length():
     assert p[0, 2] > p[0, 1]
 
 
-def test_summary_reports_the_model_is_not_measured():
+def test_summary_reports_the_constants_as_measured():
     s = coherence_summary(golden_spiral_layout(10, r_min=20.0, r_max=1000.0), LAM)
-    assert s["constants_measured"] is False
+    assert s["constants_measured"] is True
+    assert "ALMA Memo 624" in s["source"]
     assert 0.0 <= s["coherence_mean"] <= 1.0
     assert 0.0 <= s["fraction_below_0p5"] <= 1.0
+
+
+def test_unknown_condition_is_rejected():
+    from thz_opt.constraints.atmosphere_data import phase_conditions
+
+    with pytest.raises(ValueError):
+        phase_conditions("perfect_weather")
 
 
 def test_coherence_term_is_exactly_quadratic_in_the_qubo():
