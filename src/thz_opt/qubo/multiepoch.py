@@ -140,26 +140,44 @@ def multiepoch_size_report(multiplicities_per_epoch: list, n_pads: int,
 
 
 def build_multiepoch_qubo(multiplicities_per_epoch: list, spec: MultiEpochSpec,
-                          max_variables: int = 200000):
+                          max_variables: int = 200000, sparse: bool = False):
     """Assemble the multi-epoch QUBO minimising pooled PSF sidelobe energy.
 
     The objective is ``sum_c n_c^2`` with ``n_c`` pooled over epochs -- the same
     Parseval-backed quantity as the single-epoch model, so the two are directly
     comparable. Returns ``(Q, offset, meta)`` upper triangular, in the
     convention of :mod:`thz_opt.qubo.objective`.
+
+    ``sparse=True`` returns ``Q`` as a ``{(a, b): coefficient}`` dict instead of
+    a dense array. That is what actually makes realistic sizes reachable: a
+    dense ``V x V`` matrix at ``M = 100, T = 3`` is 15150 variables, i.e. 1.8 GB
+    of float64, while the model has only a few million non-zero couplings. It is
+    also the form ``dimod.BinaryQuadraticModel.from_qubo`` wants, so nothing is
+    lost on the way to a solver.
     """
-    if spec.n_variables > max_variables:
+    if not sparse and spec.n_variables > max_variables:
         raise ValueError(f"model needs {spec.n_variables} variables "
-                         f"(> max_variables={max_variables})")
+                         f"(> max_variables={max_variables}); pass sparse=True "
+                         f"to build it as a coefficient dict instead")
 
     i_idx, j_idx = pair_indices(spec.n_pads)
     V = spec.n_variables
-    Q = np.zeros((V, V))
     offset = 0.0
 
-    def add(u: int, v: int, val: float) -> None:
-        a, b = (u, v) if u <= v else (v, u)
-        Q[a, b] += val
+    # One accumulator, two backing stores.  The add() closure is the only writer,
+    # so swapping dense for sparse costs nothing in the rest of the function.
+    if sparse:
+        Q: dict = {}
+
+        def add(u: int, v: int, val: float) -> None:
+            key = (u, v) if u <= v else (v, u)
+            Q[key] = Q.get(key, 0.0) + val
+    else:
+        Q = np.zeros((V, V))
+
+        def add(u: int, v: int, val: float) -> None:
+            a, b = (u, v) if u <= v else (v, u)
+            Q[a, b] += val
 
     # per-epoch cardinality and Rosenberg
     for t in range(spec.n_epochs):
@@ -204,7 +222,9 @@ def build_multiepoch_qubo(multiplicities_per_epoch: list, spec: MultiEpochSpec,
 
     meta = {
         **spec.as_dict(),
-        "n_quadratic_terms": int(np.count_nonzero(np.triu(Q, 1))),
+        "n_quadratic_terms": (sum(1 for (a, b), c in Q.items() if a != b and c != 0.0)
+                              if sparse else int(np.count_nonzero(np.triu(Q, 1)))),
+        "sparse": bool(sparse),
         "n_movement_terms": n_move_terms,
         "n_cells_touched": len(by_cell),
         "objective": "pooled_psf_sidelobe_energy",
