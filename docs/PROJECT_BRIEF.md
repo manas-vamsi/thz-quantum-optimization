@@ -159,7 +159,8 @@ R_k = λ_R (x_i x_j − 2 x_i y_k − 2 x_j y_k + 3 y_k)
 ```
 
 which is 0 iff `y_k = x_i x_j` and ≥ λ_R otherwise. Every term is quadratic.
-In `y`, three different objectives are **exactly quadratic**:
+In `y`, several objectives are **exactly quadratic**. Note the distinction in
+the first row: what is exact there is the *bound*, not the coverage.
 
 | objective | form in `y` | source |
 |---|---|---|

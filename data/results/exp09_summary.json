@@ -1,0 +1,188 @@
+{
+  "grid_sensitivity": {
+    "n_cells_per_axis": 32,
+    "sidelobe_energy": {
+      "max": 8194042.0,
+      "mean": 8032049.111111111,
+      "min": 7952436.0,
+      "n_grids": 9,
+      "relative_spread": 0.010843930162747246,
+      "std": 87098.97962464498
+    },
+    "unique_cells": {
+      "max": 474.0,
+      "mean": 468.3333333333333,
+      "min": 465.0,
+      "n_grids": 9,
+      "relative_spread": 0.006600440210317228,
+      "std": 3.091206165165235
+    }
+  },
+  "multifrequency": [
+    {
+      "fractional_bandwidth": 0.0,
+      "n_channels": 1,
+      "n_samples": 8610,
+      "psf_peak_sidelobe": 0.15673881067689455,
+      "unique_cells": 340,
+      "uv_radius_ratio": 1.0
+    },
+    {
+      "fractional_bandwidth": 0.05,
+      "n_channels": 3,
+      "n_samples": 25830,
+      "psf_peak_sidelobe": 0.1461753969881455,
+      "unique_cells": 370,
+      "uv_radius_ratio": 1.0512820512820513
+    },
+    {
+      "fractional_bandwidth": 0.1,
+      "n_channels": 5,
+      "n_samples": 43050,
+      "psf_peak_sidelobe": 0.17154370145360825,
+      "unique_cells": 398,
+      "uv_radius_ratio": 1.105263157894737
+    },
+    {
+      "fractional_bandwidth": 0.2,
+      "n_channels": 5,
+      "n_samples": 43050,
+      "psf_peak_sidelobe": 0.12985934663204998,
+      "unique_cells": 447,
+      "uv_radius_ratio": 1.2222222222222223
+    },
+    {
+      "fractional_bandwidth": 0.3,
+      "n_channels": 7,
+      "n_samples": 60270,
+      "psf_peak_sidelobe": 0.13707511286545368,
+      "unique_cells": 487,
+      "uv_radius_ratio": 1.3529411764705883
+    }
+  ],
+  "multifrequency_gain": 1.4323529411764706,
+  "parameters": {
+    "M": 60,
+    "N": 15,
+    "band": {
+      "centre_hz": 300000000000.0,
+      "fractional_bandwidth": 0.25,
+      "frequencies_hz": [
+        262500000000.0,
+        281250000000.0,
+        300000000000.0,
+        318750000000.0,
+        337500000000.0
+      ],
+      "n_channels": 5,
+      "uv_radius_ratio": 1.2857142857142858
+    },
+    "grid_cells": 32,
+    "seed": 20260916
+  },
+  "pareto": {
+    "n_front": 11,
+    "n_runs": 13
+  },
+  "science_cases": [
+    {
+      "case": "compact_source",
+      "max_baseline_m": 1923.244820687205,
+      "median_baseline_m": 842.3107546770713,
+      "psf_fwhm_arcsec": 0.05116996281427152,
+      "psf_peak_sidelobe": 0.10392250652388364,
+      "selection": [
+        1,
+        2,
+        5,
+        8,
+        11,
+        15,
+        18,
+        19,
+        21,
+        40,
+        44,
+        46,
+        51,
+        52,
+        57
+      ],
+      "sum_sq": 7555234.0,
+      "unique_cells": 706,
+      "weighted_cells": 633.376654632985
+    },
+    {
+      "case": "extended_emission",
+      "max_baseline_m": 1731.9431341075926,
+      "median_baseline_m": 839.1938047278846,
+      "psf_fwhm_arcsec": 0.059815686281271555,
+      "psf_peak_sidelobe": 0.16454475153588916,
+      "selection": [
+        43,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59
+      ],
+      "sum_sq": 9982120.0,
+      "unique_cells": 505,
+      "weighted_cells": 1023.9999999999977
+    }
+  ],
+  "shared_pads": 4,
+  "soft_vs_hard": [
+    {
+      "max_baseline_m": 1977.9582800476785,
+      "median_baseline_m": 1156.3632811986583,
+      "shared_with_flat": 15,
+      "unique_cells": 769,
+      "weighting": "flat (no science case)"
+    },
+    {
+      "max_baseline_m": 1977.9582800476785,
+      "median_baseline_m": 1230.346733228537,
+      "shared_with_flat": 10,
+      "unique_cells": 769,
+      "weighting": "smooth tilt to long (r^1)"
+    },
+    {
+      "max_baseline_m": 1977.9582800476785,
+      "median_baseline_m": 1200.1933604111694,
+      "shared_with_flat": 11,
+      "unique_cells": 769,
+      "weighting": "smooth tilt to long (r^4)"
+    },
+    {
+      "max_baseline_m": 1977.9582800476785,
+      "median_baseline_m": 1298.5945969413199,
+      "shared_with_flat": 9,
+      "unique_cells": 770,
+      "weighting": "smooth tilt to short (exp)"
+    },
+    {
+      "max_baseline_m": 1977.9582800476785,
+      "median_baseline_m": 1298.5945969413199,
+      "shared_with_flat": 13,
+      "unique_cells": 763,
+      "weighting": "restricted to long (r > 2rb)"
+    },
+    {
+      "max_baseline_m": 1731.9431341075926,
+      "median_baseline_m": 839.1938047278846,
+      "shared_with_flat": 8,
+      "unique_cells": 505,
+      "weighting": "restricted to short (r < rb)"
+    }
+  ]
+}

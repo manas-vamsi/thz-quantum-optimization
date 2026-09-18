@@ -17,7 +17,7 @@ number; open questions are listed in §10 rather than papered over.
 | `H_shadow` | dish obscuration, `d_min ≥ 1.5 D` | yes, in `x` | complete |
 | `H_phase` | Kolmogorov phase structure function + decorrelation | **yes, in `x`** | derived here, replaces the earlier graph placeholder |
 | `H_pwv` | site opacity, `τ₂₂₅ ≈ 0.049·PWV + 0.018` | yes, linear in `x` | needs per-pad PWV data |
-| `H_uv` | UV-cell occupancy from precomputed tracks | **no in `x`; yes in baseline variables `y`** | complete, with the resolution in §6 |
+| `H_uv` | UV-cell occupancy from precomputed tracks | **no in `x`; yes in baseline variables `y`** (exactly for sidelobe energy / Cornwell / density; as a bound for union coverage) | complete, with the resolution in §6 |
 
 ---
 
@@ -317,8 +317,15 @@ otherwise. Every term in (6.1) is quadratic, so the whole model
 $$H_{\rm total} = H_{\rm select} + H_{\rm shadow} + H_{\rm phase} + H_{\rm pwv}
   + H_{\rm uv}(y) + \sum_k R_k$$
 
-is a **genuine QUBO over `M + M(M−1)/2` variables, with the objective
-represented exactly and no approximation whatsoever**.
+is a **genuine QUBO over `M + M(M−1)/2` variables**.
+
+**What "exactly" covers, precisely.** The quadratic form in `y` *equals* the
+objective for PSF sidelobe energy (5.2), Cornwell repulsion, and target-density
+matching. For unique-cell coverage it equals the **Bonferroni lower bound**
+(5.3), not the coverage itself: the two coincide only when no UV cell is
+touched by three or more active baselines. Exact union coverage requires cell
+variables or a higher-order inclusion–exclusion construction. The size of that
+gap is measured, not assumed — see the `bound gap` column in §6.
 
 ### Measured comparison
 
