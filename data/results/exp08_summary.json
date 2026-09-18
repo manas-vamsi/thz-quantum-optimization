@@ -2,65 +2,76 @@
   "best_design": 610,
   "best_searched": 763,
   "certified_instance": {
-    "grid_cells": 24,
-    "m_pads": 40,
+    "best_heuristic": 154,
+    "grid_cells": 16,
+    "incumbent": 154,
+    "m_pads": 24,
     "milp": {
-      "coverage": 367,
-      "message": "Time limit reached. (HiGHS Status 13: Time limit reached)",
-      "mip_gap": 0.1307901907356948,
-      "n_constraints": 1995,
+      "coverage": 154,
+      "incumbent_gap_percent": 1.8455655474288313e-14,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "mip_gap": 0.0,
+      "n_constraints": 732,
       "n_forbidden_pairs": 0,
-      "n_variables": 1254,
-      "n_x": 40,
-      "n_y": 780,
-      "n_z": 434,
-      "proven_optimal": false,
-      "status": 1
+      "n_variables": 479,
+      "n_x": 24,
+      "n_y": 276,
+      "n_z": 179,
+      "proven_optimal": true,
+      "status": 0,
+      "upper_bound": 154.00000000000003
     },
-    "n_select": 10,
-    "optimum": 367,
+    "n_select": 8,
+    "proven_optimal": true,
     "rows": [
       {
-        "gap_percent": 0.0,
-        "method": "MILP (exact)",
-        "proven_optimal": false,
-        "seconds": 600.0741436481476,
-        "unique_cells": 367
+        "gap_percent": 1.8455655474288313e-14,
+        "method": "MILP (incumbent)",
+        "proven_optimal": true,
+        "seconds": 54.46283793449402,
+        "unique_cells": 154,
+        "upper_bound": 154.00000000000003
       },
       {
-        "gap_percent": 2.7247956403269753,
+        "gap_percent": 1.9480519480519662,
         "method": "greedy removal",
         "proven_optimal": false,
-        "seconds": 1.505192518234253,
-        "unique_cells": 357
+        "seconds": 0.1977241039276123,
+        "unique_cells": 151,
+        "upper_bound": 154.00000000000003
       },
       {
-        "gap_percent": 1.3623978201634876,
+        "gap_percent": 3.896103896103914,
         "method": "greedy addition",
         "proven_optimal": false,
-        "seconds": 0.10617923736572266,
-        "unique_cells": 362
+        "seconds": 0.045393943786621094,
+        "unique_cells": 148,
+        "upper_bound": 154.00000000000003
       },
       {
-        "gap_percent": -0.8174386920980926,
+        "gap_percent": 1.8455655474288313e-14,
         "method": "annealing",
         "proven_optimal": false,
-        "seconds": 11.549935579299927,
-        "unique_cells": 370
+        "seconds": 6.2747015953063965,
+        "unique_cells": 154,
+        "upper_bound": 154.00000000000003
       },
       {
-        "gap_percent": 1.6348773841961852,
+        "gap_percent": 0.6493506493506677,
         "method": "greedy + local search",
         "proven_optimal": false,
-        "seconds": 0.43979859352111816,
-        "unique_cells": 361
+        "seconds": 0.08592009544372559,
+        "unique_cells": 153,
+        "upper_bound": 154.00000000000003
       }
-    ]
+    ],
+    "upper_bound": 154.00000000000003
   },
   "milp": {
-    "coverage": 311,
+    "coverage": 747,
+    "incumbent_gap_percent": 2.0969855832241153,
     "message": "Time limit reached. (HiGHS Status 13: Time limit reached)",
-    "mip_gap": 1.4533762057877813,
+    "mip_gap": 0.0214190093708166,
     "n_constraints": 15047,
     "n_forbidden_pairs": 3,
     "n_variables": 8023,
@@ -69,28 +80,29 @@
     "n_z": 763,
     "proven_optimal": false,
     "selection": [
-      18,
+      2,
+      10,
       19,
       20,
-      21,
+      24,
       26,
-      29,
-      37,
       39,
       55,
       57,
       58,
       59,
-      67,
-      78,
+      63,
+      79,
+      89,
       90,
+      91,
       92,
-      95,
-      97,
-      100,
+      96,
+      98,
       112
     ],
-    "status": 1
+    "status": 1,
+    "upper_bound": 763.0
   },
   "parameters": {
     "M": 120,
@@ -263,7 +275,7 @@
       "psf_fwhm_arcsec": 0.05412134553418123,
       "psf_peak_sidelobe": 0.06964681277517325,
       "psf_sidelobe_rms": 0.010922842892000975,
-      "seconds": 33.4305956363678,
+      "seconds": 25.011963367462158,
       "selection": [
         19,
         20,
@@ -301,7 +313,7 @@
       "psf_peak_sidelobe": 0.06494596575599917,
       "psf_sidelobe_rms": 0.011289517888790089,
       "reached_target": true,
-      "seconds": 1.3601300716400146,
+      "seconds": 1.0931460857391357,
       "seed_pad": 0,
       "selection": [
         0,
@@ -339,7 +351,7 @@
       "psf_fwhm_arcsec": 0.054198586429770663,
       "psf_peak_sidelobe": 0.06883009717792736,
       "psf_sidelobe_rms": 0.010657143554091785,
-      "seconds": 4.718173503875732,
+      "seconds": 3.477349281311035,
       "selection": [
         4,
         19,
@@ -376,7 +388,7 @@
       "psf_fwhm_arcsec": 0.054198586429770663,
       "psf_peak_sidelobe": 0.06883009717792736,
       "psf_sidelobe_rms": 0.010657143554091785,
-      "seconds": 44.330013036727905,
+      "seconds": 14.856037378311157,
       "seed": 20260916,
       "selection": [
         4,
@@ -416,7 +428,7 @@
       "psf_fwhm_arcsec": 0.054198586429770663,
       "psf_peak_sidelobe": 0.06883009717792736,
       "psf_sidelobe_rms": 0.010657143554091785,
-      "seconds": 29.009071350097656,
+      "seconds": 14.898882389068604,
       "seed": 20260917,
       "selection": [
         4,
@@ -456,7 +468,7 @@
       "psf_fwhm_arcsec": 0.054198586429770663,
       "psf_peak_sidelobe": 0.06883009717792736,
       "psf_sidelobe_rms": 0.010657143554091785,
-      "seconds": 18.16063404083252,
+      "seconds": 14.945257425308228,
       "seed": 20260918,
       "selection": [
         4,
@@ -488,41 +500,41 @@
       "unique_cells_grid": 763
     },
     {
-      "d_min_m": 68.53466492100273,
+      "d_min_m": 70.5388282202486,
       "kind": "exact",
       "method": "MILP (exact)",
       "n_evaluations": 8023,
       "proven_optimal": false,
-      "psf_fwhm_arcsec": 0.0538663140931272,
-      "psf_peak_sidelobe": 0.08725004345854218,
-      "psf_sidelobe_rms": 0.013009289127402847,
-      "seconds": 300.32618045806885,
+      "psf_fwhm_arcsec": 0.05473756517571361,
+      "psf_peak_sidelobe": 0.06929529576060214,
+      "psf_sidelobe_rms": 0.011534878656584887,
+      "seconds": 300.29241847991943,
       "selection": [
-        18,
+        2,
+        10,
         19,
         20,
-        21,
+        24,
         26,
-        29,
-        37,
         39,
         55,
         57,
         58,
         59,
-        67,
-        78,
+        63,
+        79,
+        89,
         90,
+        91,
         92,
-        95,
-        97,
-        100,
+        96,
+        98,
         112
       ],
       "separation_violations": 0,
-      "sum_sq": 498202,
-      "unique_cells_direct": 737,
-      "unique_cells_grid": 737
+      "sum_sq": 577276,
+      "unique_cells_direct": 747,
+      "unique_cells_grid": 747
     }
   ]
 }
