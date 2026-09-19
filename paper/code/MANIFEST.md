@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `7e6ea41` on 2026-09-18.
+Synchronised from the project repository at commit `9e10789` on 2026-09-19.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -34,7 +34,7 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/arrays/real_arrays.py` | `11071d5bc91541ea` | 7329 |
 | `code/src/thz_opt/arrays/validation.py` | `57236f8e8a4bd8df` | 1528 |
 | `code/src/thz_opt/constraints/__init__.py` | `e3b0c44298fc1c14` | 0 |
-| `code/src/thz_opt/constraints/atmosphere_data.py` | `55d9f82fb293ce2c` | 6800 |
+| `code/src/thz_opt/constraints/atmosphere_data.py` | `b0997c86b211b4b0` | 6800 |
 | `code/src/thz_opt/constraints/cable.py` | `506316e1fae8e5dd` | 3845 |
 | `code/src/thz_opt/constraints/coherence.py` | `d55a2375957c31c2` | 9308 |
 | `code/src/thz_opt/constraints/phase.py` | `5425e803066341d0` | 5293 |

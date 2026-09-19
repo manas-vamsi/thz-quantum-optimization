@@ -117,7 +117,7 @@ ALMA_PWV_SUMMARY = {
     "median_august_mm": 0.72,
     "site": "Llano de Chajnantor plateau, 5059 m",
     "span_years": 20,
-    "source": "Cortes et al. (2020), A&A 640, A126, doi:10.1051/0004-6361/201937784",
+    "source": "Cortes et al. (2020), A&A 640, A126, doi:10.1051/0004-6361/202037784",
 }
 
 

@@ -5,7 +5,7 @@
       "m_pads": 24,
       "n_select": 8,
       "proven_optimal": true,
-      "seconds": 28.42398452758789,
+      "seconds": 25.114957571029663,
       "upper_bound": 161.99999999999997
     },
     {
@@ -13,7 +13,7 @@
       "m_pads": 40,
       "n_select": 10,
       "proven_optimal": true,
-      "seconds": 63.057573318481445,
+      "seconds": 52.85855007171631,
       "upper_bound": 198.0
     }
   ],
@@ -251,7 +251,7 @@
       "min_separation_m": 55.556654921845706,
       "psf_fwhm_arcsec": 0.007310868919138178,
       "psf_peak_sidelobe": 0.07579890301255765,
-      "seconds": 52.597583532333374,
+      "seconds": 44.97929239273071,
       "selection": [
         "A133",
         "W201",
@@ -284,7 +284,7 @@
       "min_separation_m": 55.556654921845706,
       "psf_fwhm_arcsec": 0.007310868919138178,
       "psf_peak_sidelobe": 0.07579890301255765,
-      "seconds": 14.738492965698242,
+      "seconds": 13.005356073379517,
       "selection": [
         "A133",
         "W201",
@@ -317,7 +317,7 @@
       "min_separation_m": 55.556654921845706,
       "psf_fwhm_arcsec": 0.007310868919138178,
       "psf_peak_sidelobe": 0.07579890301255765,
-      "seconds": 2.5951461791992188,
+      "seconds": 1.0031437873840332,
       "selection": [
         "A133",
         "W201",
