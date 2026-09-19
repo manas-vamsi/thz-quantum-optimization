@@ -1,0 +1,37 @@
+{
+  "title": "QUBO Formulations for Discrete-Pad Terahertz Array Design: Certified Optima, Solver Gaps, and a Science-Derived Objective",
+  "description": "<p>Code, data and manuscript for a study formulating discrete-pad terahertz interferometer design as a quadratic unconstrained binary optimization problem, solving it, and testing the assumptions the formulation rests on.</p><p>Includes: baseline-activation variables with Rosenberg quadratization for UV-overlap objectives; mixed-integer certification of optimal selections; an annealing-sampler benchmark against those certified optima; a UV weighting derived from Fisher information on a protoplanetary-disc model rather than chosen; end-to-end imaging with CLEAN deconvolution; primary beam, bandwidth and time smearing and a radiometric noise scale; a factorial separation of radial from angular layout law; and a terrain-constrained array design for two candidate sites in Ladakh.</p><p>Uses published ALMA pad coordinates and measured atmospheric statistics. No quantum hardware was used and no quantum advantage is claimed.</p>",
+  "upload_type": "software",
+  "license": "TODO",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "TODO: Surname, Given name",
+      "affiliation": "TODO",
+      "orcid": "TODO"
+    }
+  ],
+  "keywords": [
+    "radio interferometry",
+    "aperture synthesis",
+    "terahertz astronomy",
+    "submillimetre astronomy",
+    "UV coverage",
+    "array configuration",
+    "QUBO",
+    "quadratic unconstrained binary optimization",
+    "quantum annealing",
+    "simulated annealing",
+    "mixed-integer programming",
+    "Fisher information",
+    "CLEAN deconvolution"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/manas-vamsi/thz-quantum-optimization",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Before publishing this record: replace every TODO above, choose a licence (the manuscript and code may take different ones), and confirm the creator list matches the manuscript author list exactly. Zenodo mints the DOI on publication; paste it into paper/metadata.yaml as repository_doi and rebuild the PDF."
+}

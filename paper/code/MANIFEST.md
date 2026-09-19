@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `cd4149b` on 2026-09-19.
+Synchronised from the project repository at commit `0960ed4` on 2026-09-20.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -93,6 +93,7 @@ python paper/sync_code.py --check
 | `code/tests/test_ladakh_design.py` | `7a987f3ef8731fd2` | 11144 |
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
 | `code/tests/test_optimize.py` | `019c131fe3eb422a` | 2528 |
+| `code/tests/test_paper_metadata.py` | `8a7f52b95d5ce6ea` | 4256 |
 | `code/tests/test_qubo.py` | `a947af5ae1b34591` | 6969 |
 | `code/tests/test_qubo_solver.py` | `ae07699c14045141` | 5291 |
 | `code/tests/test_real_arrays.py` | `007aef074c486fb6` | 3845 |
@@ -143,4 +144,4 @@ python paper/sync_code.py --check
 | `figures/fig33_factorial_heatmap.png` | `0e349a0170ff1531` | 107093 |
 | `figures/fig34_factorial_variance.png` | `163868491b7b85a2` | 41835 |
 
-132 files.
+133 files.

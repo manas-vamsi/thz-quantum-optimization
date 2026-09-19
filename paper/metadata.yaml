@@ -1,0 +1,47 @@
+# Submission metadata for the manuscript.
+#
+# Every value marked TODO must be replaced before submission. Nothing here is
+# guessed: an invented affiliation, an uncredited coauthor or a funding line
+# that does not exist would be misconduct on a submitted paper, so the build
+# refuses to mark the manuscript submission-ready while any TODO remains.
+#
+# After filling this in, run:
+#     python paper/build_pdf.py
+# which renders the front matter from these values and drops the
+# "metadata still required" banner once they are all present.
+
+title: >-
+  QUBO Formulations for Discrete-Pad Terahertz Array Design:
+  Certified Optima, Solver Gaps, and a Science-Derived Objective
+
+authors:
+  - name: Manasa Vamsi
+    affiliation: TODO            # e.g. "Department of ..., University of ..."
+    email: TODO                  # correspondence address
+    orcid: TODO                  # optional; delete the line if not used
+    corresponding: true
+
+  # Vishwas and any ISRO Space Applications Centre coauthors go here. A person
+  # is listed only once they have seen the manuscript and agreed to authorship.
+  # - name: TODO
+  #   affiliation: Space Applications Centre, ISRO, Ahmedabad, India
+  #   email: TODO
+  #   corresponding: false
+
+funding: TODO                    # grant numbers, or the literal string "None"
+
+acknowledgements: TODO           # or "None"
+
+# Archive the repository (Zenodo, figshare, or an institutional repository) and
+# paste the DOI it returns. `.zenodo.json` in the repository root is prepared
+# for this.
+repository_doi: TODO
+
+repository_url: https://github.com/manas-vamsi/thz-quantum-optimization
+
+# Declared competing interests, or "The authors declare no competing interests."
+competing_interests: TODO
+
+# Which venue this draft is formatted for. Affects nothing in the build yet;
+# recorded so the decision is not lost.
+target_venue: TODO

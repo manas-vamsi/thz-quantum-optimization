@@ -334,18 +334,107 @@ def build(md_path: Path, out_path: Path, two_column: bool = True) -> Path:
     return out_path
 
 
+def load_metadata(path: Path | None = None) -> dict:
+    """Read paper/metadata.yaml, or return an empty dict if it is absent."""
+    import yaml
+
+    path = path or (HERE / "metadata.yaml")
+    if not path.exists():
+        return {}
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def missing_metadata(meta: dict) -> list:
+    """Every field still holding the TODO placeholder.
+
+    Returned rather than raised: a draft must still build. The point is that
+    the manuscript cannot silently *claim* to be submission-ready, not that it
+    cannot be rendered.
+    """
+    missing = []
+
+    def check(value, label):
+        if value is None or (isinstance(value, str)
+                             and value.strip().upper().startswith("TODO")):
+            missing.append(label)
+
+    for key in ("funding", "acknowledgements", "repository_doi",
+                "competing_interests", "target_venue"):
+        check(meta.get(key), key)
+    for k, author in enumerate(meta.get("authors") or [], start=1):
+        name = author.get("name", f"author {k}")
+        for field in ("affiliation", "email"):
+            check(author.get(field), f"{name}: {field}")
+    if not meta.get("authors"):
+        missing.append("authors")
+    return missing
+
+
+def author_block(meta: dict) -> list:
+    """Front-matter lines for the author list, or [] if metadata is absent."""
+    authors = meta.get("authors") or []
+    if not authors:
+        return []
+    lines = []
+    names = []
+    affils, seen = [], {}
+    for a in authors:
+        aff = a.get("affiliation", "")
+        if aff and not str(aff).upper().startswith("TODO"):
+            if aff not in seen:
+                seen[aff] = len(seen) + 1
+                affils.append(f"{seen[aff]}. {aff}")
+            names.append(f"{a.get('name', '')}<super>{seen[aff]}</super>")
+        else:
+            names.append(str(a.get("name", "")))
+    lines.append(", ".join(names))
+    lines.extend(affils)
+    for a in authors:
+        if a.get("corresponding"):
+            email = a.get("email", "")
+            if email and not str(email).upper().startswith("TODO"):
+                lines.append(f"Correspondence: {email}")
+    return lines
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", nargs="?", default=str(HERE / "manuscript.md"))
+    ap.add_argument("--check-metadata", action="store_true",
+                    help="report submission readiness and exit")
     ap.add_argument("-o", "--out", default=None)
     ap.add_argument("--single-column", action="store_true",
                     help="one wide column instead of the journal-style two")
     a = ap.parse_args()
 
+    meta = load_metadata()
+    missing = missing_metadata(meta)
+
+    if a.check_metadata:
+        if not meta:
+            print("no paper/metadata.yaml found")
+            raise SystemExit(1)
+        if missing:
+            print(f"NOT submission ready -- {len(missing)} field(s) still TODO:")
+            for m in missing:
+                print(f"  - {m}")
+            raise SystemExit(1)
+        print("submission ready: every metadata field is filled in")
+        raise SystemExit(0)
+
     src = Path(a.source).resolve()
     out = Path(a.out).resolve() if a.out else src.with_suffix(".pdf")
     build(src, out, two_column=not a.single_column)
     print(f"wrote {out} ({out.stat().st_size / 1024:.0f} kB)")
+
+    if missing:
+        print("")
+        print(f"DRAFT: {len(missing)} metadata field(s) still TODO "
+              f"({', '.join(missing[:4])}"
+              f"{', ...' if len(missing) > 4 else ''})")
+        print("Fill in paper/metadata.yaml before submitting.")
+    else:
+        print("metadata complete")
 
 
 if __name__ == "__main__":
