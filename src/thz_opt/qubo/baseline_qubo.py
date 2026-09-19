@@ -273,6 +273,7 @@ def track_cell_multiplicities(
     grid,
     observation=None,
     include_conjugate: bool = True,
+    heights: np.ndarray | None = None,
 ) -> list:
     """For each candidate pair, ``{cell id: number of samples in that cell}``.
 
@@ -280,12 +281,20 @@ def track_cell_multiplicities(
     *multiplicity*: an Earth-rotation track can revisit the same UV cell several
     times, and the sidelobe-energy objective below depends on that count, not
     just on which cells are touched.
+
+    ``heights`` gives each pad's elevation in metres. Supplying it makes the
+    projection three-dimensional; omitting it keeps the coplanar approximation.
+    It must be passed wherever the scoring path uses it, or the optimiser would
+    be choosing layouts under one model while they are reported under another.
     """
     from ..interferometry.earth_rotation import layout_to_uv_tracks
     from ..interferometry.uv import cell_ids
 
     arr = np.asarray(pads, dtype=float)
     i_idx, j_idx = pair_indices(arr.shape[0])
+    h = None if heights is None else np.asarray(heights, dtype=float).ravel()
+    if h is not None and h.shape[0] != arr.shape[0]:
+        raise ValueError("heights must have one entry per pad")
 
     out = []
     for a, b in zip(i_idx, j_idx):
@@ -295,7 +304,9 @@ def track_cell_multiplicities(
             if include_conjugate:
                 uv = np.vstack((uv, -uv))
         else:
-            uv = layout_to_uv_tracks(pair, observation, include_conjugate)
+            pair_h = None if h is None else h[[int(a), int(b)]]
+            uv = layout_to_uv_tracks(pair, observation, include_conjugate,
+                                     heights=pair_h)
         counts: dict = {}
         for c in cell_ids(uv, grid).tolist():
             counts[int(c)] = counts.get(int(c), 0) + 1

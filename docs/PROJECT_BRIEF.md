@@ -273,20 +273,44 @@ Because `γ` depends only on the pair, `H_phase` is exactly quadratic in `x`.
 ## 7. What is missing (honest list)
 
 1. **No optimiser at all.** The code can *evaluate* a configuration but never
-   *searches*. No greedy, no annealing, no solver. This is the single biggest
-   gap: every "best layout" above is the best of a hand-made shortlist, not an
-   optimised result.
+   *searches*. **Closed.** Greedy, one-swap local search and simulated
+   annealing are implemented, with MILP certification giving proven optima at
+   small sizes.
 2. **No science case**, therefore no principled choice among the objectives in
-   §5.2. They disagree.
-3. **No real data** — pad coordinates, site PWV statistics, and the phase
-   constants (σ₁, κ, turbulence breakpoints) are all synthetic or typical
-   values.
+   §5.2. **Closed.** `thz_opt.science.disk_gap` derives the UV weighting from
+   Fisher information on a protoplanetary-disc gap model, so arrays are scored
+   by the Cramér–Rao bound on a physical quantity rather than by an invented
+   metric.
+3. **No real data.** **Largely closed.** Pad coordinates are the published
+   ALMA 12 m list; the phase structure function and PWV statistics are the
+   measured ALMA values (Memo 624, Cortés 2020). What remains synthetic is the
+   pad *fields* in the controlled studies, which is deliberate.
 4. **Physics simplifications**: coplanar array (`w = 0`), no primary beam, no
    bandwidth/time smearing, no noise model, no deconvolution (CLEAN), single
-   declination, single frequency.
+   declination, single frequency. **Still open**, and no image is reconstructed
+   anywhere in the work.
 5. **No classical baseline**, so no quantum claim can currently be justified.
+   **Closed, and the answer is unfavourable**: the QUBO now runs on an
+   annealing sampler and loses to the direct classical heuristic on both
+   accuracy and time.
 6. **Not factorially controlled**: the layout families differ in radial law
    *and* angular law simultaneously, so differences cannot be attributed.
+   **Still open.**
+
+### A site claim in the onboarding note that the data contradicts
+
+The note names Hanle, Ladakh as "a comparable high-altitude, low-PWV,
+radio-quiet site" to ALMA's Chajnantor plateau. Measured statistics do not
+support the comparison. Against the note's own threshold of PWV below 1 mm,
+Hanle qualifies about **5 %** of the time and Chajnantor about **50 %** — an
+order of magnitude apart — and two unbuilt Ladakh sites reach 19 % and 23 %
+(Raghunath et al. 2026, arXiv:2604.13487, 184 months of ERA5 reanalysis).
+
+Hanle remains the only Ladakh candidate with road, power and an existing
+observatory, so the trade is real; but it should be argued as infrastructure
+against dryness, not as parity with ALMA. See `ladakh_array_design/` for a
+worked design at both sites, including the finding that Hanle's compact and
+extended configurations fall on landforms 220 m apart vertically.
 
 ---
 

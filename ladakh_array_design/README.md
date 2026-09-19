@@ -55,13 +55,13 @@ That trade — infrastructure against dryness — is a genuine decision, so the
 design is produced at **both** Hanle and site A rather than one being quietly
 preferred.
 
-**A second trade the water-vapour numbers hide.** Once pads are confined to a
-single landform (§3), Hanle keeps 313 of 327 candidate positions and its
-extended array spans only 31 m of relief. Site A keeps 118 of 262 and still
-spans 57 m, losing 0.2 km of maximum baseline and 9 % of its UV coverage in the
-process. Hanle's plain is large and genuinely flat; site A's is broken ground
-that happens to contain flat patches. The terrain penalty at site A is real,
-and it partly offsets being four times drier.
+**A second trade the water-vapour numbers hide.** Once the array centre is
+free to move onto the best available ground (§3), Hanle holds all three
+configurations within 15 m of relief; site A needs 57 m and its extended
+configuration finds only 179 buildable positions against Hanle's 544. Hanle's
+plain is large and genuinely flat; site A's is broken ground that happens to
+contain flat patches. The terrain penalty at site A is real and partly offsets
+its being four times drier.
 
 ---
 
@@ -78,93 +78,110 @@ and it partly offsets being four times drier.
 
 ---
 
-## 3. Why there are two configurations
+## 3. Why there are three configurations
 
-The first design run maximised occupied UV cells, and produced a **ring**: all
-sixteen pads between 1064 m and 1488 m of a 1500 m field, none in the inner
-half, exactly **one baseline under 300 m out of 120**.
+The first design run maximised occupied UV cells and produced a **ring**: all
+sixteen pads on the outer rim of the allowed field, none in the inner half,
+exactly **one baseline under 300 m out of 120**.
 
-That is not an optimiser bug. Outer annuli of a UV grid contain far more cells
-than inner ones, because area grows with radius, so "maximise distinct cells"
-is quietly an instruction to flee to the boundary. The array that results
-resolves beautifully and is blind to anything wider than 0.6 arcsec.
+That is not an optimiser bug. The outer annuli of a UV grid contain far more
+cells than the inner ones, because area grows with radius, so "maximise
+distinct cells" is quietly an instruction to flee to the boundary. The array
+that results resolves beautifully and is blind to anything wider than about
+half an arcsecond.
 
-Two changes follow.
+Four changes follow, each forced by the previous one.
 
 **A Gaussian target UV density** (Boone 2001) replaces the bare cell count, so
-inner cells are worth more and the optimiser buys short baselines. This helps
-but does not solve it.
+inner cells are worth more and the optimiser buys short baselines. Necessary,
+not sufficient.
 
 **A landform filter.** Flat ground is not one surface. Hanle's observatory
 stands on an isolated summit about 220 m above a wide plain, and both are
 locally flat, so a slope test accepts them equally. An early run placed
-fourteen pads on the plain and one on the summit — and that single outlier
-accounted for the entire 235 m of reported relief, describing an array with a
-240 m climb between two of its antennas. Candidates are now confined to the
-60 m elevation band holding the most buildable ground. At Hanle this costs
-almost nothing (313 of 327 candidates survive, relief falls from 235 m to
-31 m); at site A it removes more than half (262 to 118), which is itself the
-measurement that site A's ground is broken.
+fourteen pads on the plain and one on the summit, and that single outlier
+accounted for the entire 235 m of reported relief — an array with a 240 m climb
+between two of its antennas. Candidates are now confined to the 60 m elevation
+band holding the most buildable ground.
 
-**Two configurations, not one.** Sixteen antennas spread over 3 km cannot also
-provide 30 m baselines — seeing a 5 arcsec source needs one, and no
-rearrangement of sixteen pads over 3 km delivers both. Every real observatory
-answers this the same way, by moving antennas between configurations on a
-shared pad field; ALMA and the VLA both do it, and §4.5 of the manuscript
-measures what reconfiguration is worth.
+**An array centre that is not the site marker.** A published coordinate names a
+building. Centring the design on Hanle's observatory put the compact array on
+the summit and the extended array on the plain — two installations 220 m apart
+vertically, not a shared pad field. The centre is now chosen by convolving the
+landform mask with a disc of one array radius and taking the maximum: *where
+does a full disc of usable ground actually fit?* It moves 2049 m at Hanle and
+1954 m at site A. The obvious alternative, the centroid of the landform, fails
+precisely here — Hanle's plain is an annulus and the centroid of an annulus
+sits in its hole, back on the summit.
 
----
+**Three configurations, not one, and not two.** Sixteen antennas over 3 km
+cannot also provide 32 m baselines. Two configurations only give continuous
+coverage if they overlap — the smaller array must *resolve* finer than the
+larger one can *see*:
+
+    lambda / b_max(small)  <  0.6 lambda / b_min(large)
+
+A 400 m compact array failed that test at Hanle, leaving structures between
+0.48″ and 0.69″ sampled well by neither. Widening it to 800 m closed the gap
+but spread its own pads, pushing its shortest baseline from 32 m to 90 m and
+collapsing its largest recoverable scale from 5.0″ to 2.5″. One array cannot be
+both the short-spacing array and the bridge.
+
+Three rungs resolve it, which is why real arrays have several — ALMA has ten.
+Compact keeps the 32 m baselines and the 5″ sensitivity, extended keeps the
+resolution, and intermediate exists only to join them. **The overlap at each
+joint is computed and printed on every run**, so a terrain change that reopens
+a gap is reported rather than hidden.
 
 ## 4. The design
 
-### Hanle (32.7794 °N, 78.9642 °E)
+All quantities below are computed in three dimensions from the elevation model,
+not under the coplanar approximation.
 
-| | Compact | Extended |
+### Hanle (32.7794 °N, 78.9642 °E) — array centre 2049 m from the site marker
+
+| | Compact | Intermediate | Extended |
+|---|---:|---:|---:|
+| Candidate positions | 43 | 585 | 544 |
+| Baselines | 32 – 232 m | 64 – 878 m | 338 – 2788 m |
+| **Resolves to** | 1.158″ | 0.306″ | **0.096″** |
+| **Sees up to** | **5.01″** | 2.50″ | 0.48″ |
+| Occupied UV cells | 1772 | 2038 | 2108 |
+| Peak sidelobe | 0.102 | 0.105 | 0.100 |
+| Ground relief | 11 m | 9 m | 15 m |
+
+### Ladakh site A (34.25 °N, 78.75 °E) — array centre 1954 m from the site marker
+
+| | Compact | Intermediate | Extended |
+|---|---:|---:|---:|
+| Candidate positions | 45 | 244 | 179 |
+| Baselines | 32 – 228 m | 47 – 857 m | 179 – 2686 m |
+| **Resolves to** | 1.178″ | 0.314″ | **0.100″** |
+| **Sees up to** | **5.10″** | 3.40″ | 0.90″ |
+| Occupied UV cells | 1920 | 2088 | 1600 |
+| Peak sidelobe | 0.088 | 0.098 | 0.142 |
+| Ground relief | 12 m | 57 m | 53 m |
+
+### Combined
+
+| | Hanle | Site A |
 |---|---:|---:|
-| Candidate positions | 36 | 313 |
-| Baselines | 32 – 328 m | 252 – 2950 m |
-| **Resolution** | 0.819″ | **0.091″** |
-| **Largest angular scale** | **5.01″** | 0.64″ |
-| Occupied UV cells | 1342 (32.8 %) | 2164 (52.8 %) |
-| Peak sidelobe | 0.133 | 0.096 |
-| Ground relief | 30 m | 31 m |
+| Finest detail | 0.096″ | 0.100″ |
+| Widest structure | 5.01″ | 5.10″ |
+| **Range of angular scales** | **52×** | **51×** |
+| compact / intermediate joint | overlap 1.35″ | overlap 2.22″ |
+| intermediate / extended joint | overlap 0.17″ | overlap 0.59″ |
+| Coverage | **continuous** | **continuous** |
+| Worst ground relief | **15 m** | 57 m |
 
-### Ladakh site A (34.25 °N, 78.75 °E)
-
-| | Compact | Extended |
-|---|---:|---:|
-| Candidate positions | 123 | 118 |
-| Baselines | 32 – 370 m | 127 – 2738 m |
-| **Resolution** | 0.727″ | **0.098″** |
-| **Largest angular scale** | **5.10″** | 1.27″ |
-| Occupied UV cells | 1878 (45.8 %) | 1872 (45.7 %) |
-| Peak sidelobe | 0.101 | 0.124 |
-| Ground relief | 22 m | 57 m |
-
-Hanle spans **55×** in angular scale, site A **52×**, from roughly 0.1″ detail
-to 5″ structure.
-
-Two caveats visible only in these tables.
-
-**Hanle's compact configuration has just 36 candidate positions** within the
-200 m radius, against 123 at site A: choosing sixteen antennas from thirty-six
-options is a tight design space, because the observatory stands on a summit
-whose plateau is small.
-
-**The two Hanle configurations sit on different landforms.** The compact array
-occupies the summit plateau at about 4490 m; the extended array occupies the
-plain at about 4270 m, 220 m below. They are therefore *not* a shared,
-reconfigurable pad field — moving antennas between them means a 220 m climb.
-Reconfiguration as analysed in §4.5 of the manuscript assumes one field, and
-that assumption does not hold at Hanle. Site A's two configurations are 60 m
-apart vertically, which is far more workable.
-
----
+Hanle holds every configuration within 15 m of relief; site A needs 57 m. With
+the array centre free to move, Hanle's plain is the better ground by a clear
+margin, which partly offsets site A being four times drier.
 
 ## 5. Outputs
 
-For each of `hanle_compact`, `hanle_extended`, `site_a_compact`,
-`site_a_extended`:
+For each of `hanle_compact`, `hanle_intermediate`, `hanle_extended`,
+`site_a_compact`, `site_a_intermediate`, `site_a_extended`:
 
 | File | Contents |
 |---|---|
@@ -217,12 +234,13 @@ the reports (0.93 extended, 0.99 compact) are a **transfer from Chajnantor**
 and are labelled as a model. They must not be quoted as a site measurement, and
 they are the single largest unknown in this design.
 
-**Elevation is ignored in the UV calculation.** The array is treated as
-coplanar, with no *w* term. With the landform filter in place the relief is
-22–57 m across every configuration, which is small against baselines of
-hundreds of metres to 3 km, so the approximation is defensible here. It was not
-defensible before that filter existed, and it would stop being defensible again
-if the elevation band were widened.
+**Elevation is now included.** Station heights enter the baseline through the
+``Up`` term, so ``(u, v)`` and ``w`` both carry the real relief; the coplanar
+approximation used by the controlled studies elsewhere in this repository is
+not used here. It matters: 200 m of relief across 3 km shifts the UV track by
+about 2.3 % of its extent, while 20 m shifts it by under 0.5 %. Fixing this
+also *exposed* the coverage gap described in §3, which the wrong physics had
+been masking — the constraints interact.
 
 **The terrain model is 16 m/pixel.** It establishes that a region is broadly
 flat. It cannot see a boulder field, a gully, or unstable ground.

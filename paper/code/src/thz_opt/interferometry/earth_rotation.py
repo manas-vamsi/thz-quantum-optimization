@@ -104,16 +104,31 @@ def project_uvw(
 
 
 def layout_to_uv_tracks(
-    xy: np.ndarray, config: ObservationConfig, include_conjugate: bool = True
+    xy: np.ndarray, config: ObservationConfig, include_conjugate: bool = True,
+    heights: np.ndarray | None = None
 ) -> np.ndarray:
-    """Earth-rotation ``(u, v)`` tracks of a coplanar layout, in wavelengths.
+    """Earth-rotation ``(u, v)`` tracks of a layout, in wavelengths.
 
-    The layout is treated as strictly coplanar (``Up = 0``); station height
-    differences are outside the present model and are listed as a limitation in
-    the README.
+    ``heights`` gives each station's elevation in metres. Passing it makes the
+    projection fully three-dimensional: height differences enter the equatorial
+    baseline through :func:`enu_to_xyz`, which already carries the ``Up`` term,
+    and so change ``(u, v)`` as well as ``w``.
+
+    Omitting it keeps the coplanar approximation ``Up = 0``, which is what the
+    controlled studies in this repository use so that layouts differ only in
+    their horizontal geometry. The approximation is safe while height
+    differences are small against baseline length, and stops being safe when
+    they are not -- a real site can put 200 m of relief across a 3 km array.
     """
-    b2d, _, _ = compute_baselines(xy)
-    b_enu = np.column_stack((b2d, np.zeros(len(b2d))))
+    b2d, i_idx, j_idx = compute_baselines(xy)
+    if heights is None:
+        up = np.zeros(len(b2d))
+    else:
+        h = np.asarray(heights, dtype=float).ravel()
+        if h.shape[0] != np.asarray(xy).shape[0]:
+            raise ValueError("heights must have one entry per station")
+        up = h[j_idx] - h[i_idx]
+    b_enu = np.column_stack((b2d, up))
     b_xyz = enu_to_xyz(b_enu, np.deg2rad(config.latitude_deg))
     uvw = project_uvw(
         b_xyz, config.hour_angles_rad, np.deg2rad(config.declination_deg), config.wavelength

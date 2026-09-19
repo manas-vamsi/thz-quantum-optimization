@@ -35,6 +35,11 @@ Track, 4 hours           +/- 2 h of hour angle about transit.
 
 Honest status of the output
 ---------------------------
+Baselines and UV coverage are computed in three dimensions from the elevation
+model, not under the coplanar approximation used by the controlled studies
+elsewhere in this repository, because a real site puts tens of metres of relief
+across an array.
+
 This is a preliminary geometric design: pad coordinates, baselines, UV
 coverage, point-spread function and resolution. It is **not** a construction
 plan. There is no geotechnical survey, no land-rights check, no access-road or
@@ -78,7 +83,8 @@ import site_data
 import terrain
 
 __all__ = ["DesignSpec", "candidate_pads", "optimise_layout", "design_site",
-           "write_cfg", "layout_report", "order_pads", "pad_table"]
+           "write_cfg", "layout_report", "order_pads", "pad_table",
+           "find_array_centre"]
 
 C = 299_792_458.0
 ARCSEC = np.pi / (180.0 * 3600.0)
@@ -150,20 +156,20 @@ class DesignSpec:
         }
 
 
-def candidate_pads(dem, spec: DesignSpec):
+def candidate_pads(dem, spec: DesignSpec, centre=(0.0, 0.0)):
     """Buildable ground sampled into a candidate pad grid.
 
     Cells are taken on a coarse lattice so that candidates are already further
-    apart than the shadowing limit, then filtered by slope and radius. The
-    lattice is offset to the site origin so the array centre is always a
-    candidate.
+    apart than the shadowing limit, then filtered by slope and by distance from
+    ``centre``, which is the array centre in local east/north metres and need
+    not be the site's published coordinate -- see :func:`find_array_centre`.
     """
-    mask = terrain.buildable_mask(dem, spec.max_slope_deg, spec.array_radius_m)
+    mask = _radius_mask(dem, spec.max_slope_deg, spec.array_radius_m, centre)
     step = max(1, int(round(spec.candidate_spacing_m / dem.pixel_m)))
 
-    # centre the lattice on the origin cell
-    i0 = int(np.argmin(np.abs(dem.north)))
-    j0 = int(np.argmin(np.abs(dem.east)))
+    # centre the lattice on the array centre cell
+    i0 = int(np.argmin(np.abs(dem.north - centre[1])))
+    j0 = int(np.argmin(np.abs(dem.east - centre[0])))
     ii = np.arange(i0 % step, mask.shape[0], step)
     jj = np.arange(j0 % step, mask.shape[1], step)
 
@@ -177,6 +183,79 @@ def candidate_pads(dem, spec: DesignSpec):
     if spec.max_elevation_spread_m is not None and len(xy):
         xy, elev = _dominant_landform(xy, elev, spec.max_elevation_spread_m)
     return xy, elev
+
+
+def _radius_mask(dem, max_slope_deg, radius_m, centre):
+    """Buildable cells within ``radius_m`` of an arbitrary array centre."""
+    mask = terrain.slope_deg(dem) <= float(max_slope_deg)
+    ee, nn = np.meshgrid(dem.east, dem.north)
+    return mask & (np.hypot(ee - centre[0], nn - centre[1]) <= float(radius_m))
+
+
+def find_array_centre(dem, spec: DesignSpec, search_radius_m: float | None = None):
+    """Where the array should actually be centred, which is not the site marker.
+
+    A published site coordinate names a building, not an array. At Hanle it
+    names the observatory on the summit of Mt Saraswati, about 220 m above the
+    plain. Centring the design there gave a compact configuration on the summit
+    plateau and an extended configuration down on the plain -- two arrays on
+    two landforms, 220 m apart vertically, which is not a reconfigurable pad
+    field but two separate installations.
+
+    Why this is not a centroid
+    --------------------------
+    The obvious implementation, the centroid of the dominant landform, fails
+    exactly here. Hanle's plain is an annulus surrounding the summit, and the
+    centroid of an annulus sits in its hole -- on the summit. That version moved
+    the centre 74 m and changed nothing.
+
+    Instead the centre is the position that maximises the amount of dominant
+    landform lying within one array radius, computed as a convolution of the
+    landform mask with a disc. For an annulus that correctly selects an
+    off-centre position where a full disc of usable ground fits.
+
+    Returns ``(east, north)`` in metres from the published coordinate, plus a
+    report of what was chosen.
+    """
+    from scipy.signal import fftconvolve
+
+    search = search_radius_m or (spec.array_radius_m + 2000.0)
+    flat = terrain.slope_deg(dem) <= spec.max_slope_deg
+    ee, nn = np.meshgrid(dem.east, dem.north)
+    within = flat & (np.hypot(ee, nn) <= search)
+    if not within.any():
+        return (0.0, 0.0), {"moved_m": 0.0, "reason": "no buildable ground found"}
+
+    # restrict to one landform, the elevation band holding the most of it
+    landform = within
+    if spec.max_elevation_spread_m is not None:
+        z = dem.elevation[within]
+        band = spec.max_elevation_spread_m
+        edges = np.unique(np.round(z))
+        best_n, lo = max((int(np.sum((z >= e) & (z <= e + band))), e) for e in edges)
+        landform = within & (dem.elevation >= lo) & (dem.elevation <= lo + band)
+
+    # how much of that landform falls inside a disc centred on each cell
+    pix = dem.pixel_m
+    r_px = max(1, int(round(spec.array_radius_m / pix)))
+    yy, xx = np.mgrid[-r_px:r_px + 1, -r_px:r_px + 1]
+    disc = (xx ** 2 + yy ** 2 <= r_px ** 2).astype(float)
+    score = fftconvolve(landform.astype(float), disc, mode="same")
+
+    # the centre must itself lie within the searched area
+    score[~within] = -1.0
+    i, j = np.unravel_index(int(np.argmax(score)), score.shape)
+    centre = (float(dem.east[j]), float(dem.north[i]))
+
+    inside = np.hypot(ee - centre[0], nn - centre[1]) <= spec.array_radius_m
+    return centre, {
+        "east_m": centre[0], "north_m": centre[1],
+        "moved_m": float(np.hypot(*centre)),
+        "landform_elevation_m": float(dem.elevation[landform & inside].mean()),
+        "site_marker_elevation_m": float(dem.at(0.0, 0.0)),
+        "usable_cells_in_footprint": int((landform & inside).sum()),
+        "method": "max buildable landform within one array radius",
+    }
 
 
 def _dominant_landform(xy, elev, band_m: float):
@@ -238,8 +317,15 @@ def uv_taper_weights(grid, sigma_fraction: float) -> np.ndarray:
     return np.exp(-0.5 * (q / sigma) ** 2)
 
 
-def optimise_layout(pads_xy, spec: DesignSpec, latitude_deg: float):
-    """Choose ``n_antennas`` candidate positions maximising UV coverage."""
+def optimise_layout(pads_xy, spec: DesignSpec, latitude_deg: float,
+                    heights=None):
+    """Choose ``n_antennas`` candidate positions maximising UV coverage.
+
+    ``heights`` are the candidates' real elevations. They are threaded all the
+    way through, so the optimiser scores the same three-dimensional geometry
+    the report measures. Scoring coplanar and reporting in 3-D would optimise
+    one array and describe another.
+    """
     obs = ObservationConfig(
         frequency_hz=spec.frequency_hz,
         declination_deg=spec.declination_deg,
@@ -251,9 +337,10 @@ def optimise_layout(pads_xy, spec: DesignSpec, latitude_deg: float):
     sep = SeparationConfig(spec.dish_m, spec.separation_factor)
     forbidden = shadow_pairs(pads_xy, sep)
 
-    uv = layout_to_uv_tracks(pads_xy, obs)
+    uv = layout_to_uv_tracks(pads_xy, obs, heights=heights)
     grid = UVGrid(uv_max=1.02 * float(np.abs(uv).max()), n_cells=spec.uv_cells)
-    mult = track_cell_multiplicities(pads_xy, spec.wavelength_m, grid, obs)
+    mult = track_cell_multiplicities(pads_xy, spec.wavelength_m, grid, obs,
+                                     heights=heights)
     cells, counts = build_pair_tables(mult)
 
     if spec.uv_taper is None:
@@ -280,7 +367,7 @@ def optimise_layout(pads_xy, spec: DesignSpec, latitude_deg: float):
     return np.asarray(res.selection, dtype=bool), grid, obs, time.time() - t0
 
 
-def order_pads(xy, elev):
+def order_pads(xy, elev, centre=(0.0, 0.0)):
     """Sort pads once, by distance from the array centre, ties broken by bearing.
 
     Every output must label the same physical pad ``P001``. An earlier version
@@ -290,15 +377,20 @@ def order_pads(xy, elev):
     """
     xy = np.asarray(xy, dtype=float)
     elev = np.asarray(elev, dtype=float)
-    radius = np.hypot(xy[:, 0], xy[:, 1])
-    bearing = np.arctan2(xy[:, 0], xy[:, 1])
+    radius = np.hypot(xy[:, 0] - centre[0], xy[:, 1] - centre[1])
+    bearing = np.arctan2(xy[:, 0] - centre[0], xy[:, 1] - centre[1])
     order = np.lexsort((bearing, np.round(radius, 3)))
     return xy[order], elev[order], radius[order]
 
 
-def pad_table(xy, elev, site_info) -> list:
-    """The pad list, canonically ordered, in both coordinate systems."""
-    xy, elev, radius = order_pads(xy, elev)
+def pad_table(xy, elev, site_info, centre=(0.0, 0.0)) -> list:
+    """The pad list, canonically ordered, in both coordinate systems.
+
+    ``east_m`` and ``north_m`` stay referenced to the site's published
+    coordinate so the geodetic conversion is unambiguous; only
+    ``radius_from_centre_m`` and the ordering use the array centre.
+    """
+    xy, elev, radius = order_pads(xy, elev, centre)
     lat, lon = terrain.enu_to_latlon(xy[:, 0], xy[:, 1],
                                      site_info["latitude_deg"],
                                      site_info["longitude_deg"])
@@ -311,14 +403,17 @@ def pad_table(xy, elev, site_info) -> list:
     ]
 
 
-def layout_report(xy, elev, spec: DesignSpec, grid, obs, site_info) -> dict:
+def layout_report(xy, elev, spec: DesignSpec, grid, obs, site_info,
+                  centre=(0.0, 0.0)) -> dict:
     """Everything an engineer or referee would ask about the chosen layout."""
     n = len(xy)
-    d = np.hypot(xy[:, None, 0] - xy[None, :, 0], xy[:, None, 1] - xy[None, :, 1])
+    dz = np.asarray(elev)[:, None] - np.asarray(elev)[None, :]
+    d = np.sqrt((xy[:, None, 0] - xy[None, :, 0]) ** 2
+                + (xy[:, None, 1] - xy[None, :, 1]) ** 2 + dz ** 2)
     iu = np.triu_indices(n, 1)
     b = d[iu]
 
-    uv = layout_to_uv_tracks(xy, obs)
+    uv = layout_to_uv_tracks(xy, obs, heights=elev)
     occ, n_outside = uv_occupancy(uv.reshape(-1, 2), grid)
     beam, beam_info = dirty_beam(uv.reshape(-1, 2), grid)
     pm = psf_metrics(beam, beam_info["pixel_scale_arcsec"])
@@ -343,25 +438,28 @@ def layout_report(xy, elev, spec: DesignSpec, grid, obs, site_info) -> dict:
         "elevation_min_m": float(elev.min()),
         "elevation_max_m": float(elev.max()),
         "elevation_spread_m": float(elev.max() - elev.min()),
-        "pads_inside_half_radius": int(np.sum(np.hypot(xy[:, 0], xy[:, 1])
-                                              < 0.5 * spec.array_radius_m)),
+        "pads_inside_half_radius": int(np.sum(
+            np.hypot(xy[:, 0] - centre[0], xy[:, 1] - centre[1])
+            < 0.5 * spec.array_radius_m)),
         "coherence_model_mean": coh["coherence_mean"],
         "coherence_model_note": ("transferred from ALMA Memo 624; no phase "
                                  "measurement exists for any Ladakh site"),
+        "uv_model": "three-dimensional, station heights from the elevation model",
         "site": site_info["name"],
         "site_latitude_deg": site_info["latitude_deg"],
         "pwv_below_1mm_fraction": site_info.get("pwv_below_1mm_fraction"),
     }
 
 
-def write_cfg(path: Path, xy, elev, spec: DesignSpec, site_info) -> Path:
+def write_cfg(path: Path, xy, elev, spec: DesignSpec, site_info,
+              centre=(0.0, 0.0)) -> Path:
     """A CASA observatory configuration file, same format as ``alma.all.cfg``.
 
     This is the deliverable that makes the design usable by anyone else: it can
     be dropped straight into CASA's ``simobserve`` to simulate observations
     with this array.
     """
-    rows = pad_table(xy, elev, site_info)
+    rows = pad_table(xy, elev, site_info, centre)
     # Height datum is the array's own mean elevation, not the site's published
     # figure: at Hanle the observatory building stands about 230 m above the
     # flat ground the array occupies, so referencing to it would record every
@@ -389,27 +487,44 @@ def write_cfg(path: Path, xy, elev, spec: DesignSpec, site_info) -> Path:
 
 
 def design_site(site_key: str, spec: DesignSpec | None = None,
-                half_size_m: float | None = None, verbose: bool = True):
-    """Full pipeline for one site: terrain, candidates, optimise, report."""
+                half_size_m: float | None = None, centre=None,
+                probe_only: bool = False, verbose: bool = True):
+    """Full pipeline for one site: terrain, centre, candidates, optimise.
+
+    ``centre`` fixes the array centre in local east/north metres. Pass the same
+    value for every configuration at a site so they share one pad field; leave
+    it None to have :func:`find_array_centre` choose it.
+    """
     spec = spec or DesignSpec()
     info = site_data.site(site_key)
-    half = half_size_m or (spec.array_radius_m + 1000.0)
+    half = half_size_m or (spec.array_radius_m + 2500.0)
 
     dem = terrain.fetch_dem(info["latitude_deg"], info["longitude_deg"], half)
     if info.get("elevation_m") is None:
         info["elevation_m"] = dem.at(0.0, 0.0)
 
-    cand_xy, cand_elev = candidate_pads(dem, spec)
+    if centre is None:
+        centre, centre_info = find_array_centre(dem, spec)
+    else:
+        centre_info = {"east_m": centre[0], "north_m": centre[1],
+                       "moved_m": float(np.hypot(*centre)), "shared": True}
+    if probe_only:
+        return {"centre": centre, "array_centre": centre_info, "dem": dem}
+
+    cand_xy, cand_elev = candidate_pads(dem, spec, centre)
     if len(cand_xy) < spec.n_antennas:
         raise RuntimeError(f"only {len(cand_xy)} buildable candidates at "
                            f"{site_key}; loosen the slope or spacing limits")
 
-    sel, grid, obs, secs = optimise_layout(cand_xy, spec, info["latitude_deg"])
+    sel, grid, obs, secs = optimise_layout(cand_xy, spec, info["latitude_deg"],
+                                          heights=cand_elev)
     xy, elev = cand_xy[sel], cand_elev[sel]
-    report = layout_report(xy, elev, spec, grid, obs, info)
+    report = layout_report(xy, elev, spec, grid, obs, info, centre)
     report["candidates"] = int(len(cand_xy))
     report["optimise_seconds"] = round(secs, 1)
     report["terrain"] = dem.summary()
-    return {"site": info, "spec": spec, "dem": dem, "candidates": cand_xy,
+    report["array_centre"] = centre_info
+    return {"site": info, "spec": spec, "dem": dem, "centre": centre,
+            "candidates": cand_xy,
             "candidate_elev": cand_elev, "xy": xy, "elev": elev,
             "grid": grid, "obs": obs, "report": report}

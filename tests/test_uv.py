@@ -150,3 +150,59 @@ def test_sampling_function_weightings():
     assert s_n.sum() == uv.shape[0]
     with pytest.raises(ValueError):
         sampling_function(uv, g, "robust")
+
+
+# --------------------------------------------------------------------------
+# station heights: the coplanar approximation, and when it stops holding
+# --------------------------------------------------------------------------
+
+def test_zero_heights_reproduce_the_coplanar_tracks_exactly():
+    """The default path must be untouched by adding the option."""
+    xy = np.array([[0.0, 0.0], [2000.0, 0.0], [0.0, 2000.0], [900.0, -1300.0]])
+    obs = ObservationConfig(frequency_hz=230e9, declination_deg=30.0,
+                            latitude_deg=32.78, hour_angle_start_h=-2.0,
+                            hour_angle_end_h=2.0, n_times=9)
+    flat = layout_to_uv_tracks(xy, obs)
+    explicit = layout_to_uv_tracks(xy, obs, heights=np.zeros(len(xy)))
+    assert np.allclose(flat, explicit)
+
+
+def test_station_height_changes_the_uv_track():
+    """Relief is not a w-only effect: it moves (u, v) as well.
+
+    This is why an array split across 200 m of relief cannot be scored with the
+    coplanar approximation, and why the Ladakh design confines pads to one
+    landform.
+    """
+    xy = np.array([[0.0, 0.0], [3000.0, 0.0], [0.0, 3000.0]])
+    obs = ObservationConfig(frequency_hz=230e9, declination_deg=30.0,
+                            latitude_deg=32.78, hour_angle_start_h=-2.0,
+                            hour_angle_end_h=2.0, n_times=9)
+    flat = layout_to_uv_tracks(xy, obs)
+    tall = layout_to_uv_tracks(xy, obs, heights=np.array([0.0, 200.0, 0.0]))
+    shift = np.abs(flat - tall).max() / np.abs(flat).max()
+    assert 0.005 < shift < 0.1          # a few per cent for 200 m over 3 km
+
+    # a small relief is negligible, which is the licence the design relies on
+    low = layout_to_uv_tracks(xy, obs, heights=np.array([0.0, 20.0, 0.0]))
+    assert np.abs(flat - low).max() / np.abs(flat).max() < 0.005
+
+
+def test_height_effect_scales_with_the_height_difference():
+    """Only differences matter: lifting the whole array changes nothing."""
+    xy = np.array([[0.0, 0.0], [1500.0, 0.0], [0.0, 1500.0]])
+    obs = ObservationConfig(frequency_hz=230e9, declination_deg=30.0,
+                            latitude_deg=32.78, hour_angle_start_h=-1.0,
+                            hour_angle_end_h=1.0, n_times=5)
+    base = layout_to_uv_tracks(xy, obs)
+    offset = layout_to_uv_tracks(xy, obs, heights=np.full(len(xy), 4500.0))
+    assert np.allclose(base, offset)
+
+
+def test_wrong_number_of_heights_is_rejected():
+    xy = np.array([[0.0, 0.0], [1000.0, 0.0], [0.0, 1000.0]])
+    obs = ObservationConfig(frequency_hz=230e9, declination_deg=30.0,
+                            latitude_deg=32.78, hour_angle_start_h=-1.0,
+                            hour_angle_end_h=1.0, n_times=5)
+    with pytest.raises(ValueError):
+        layout_to_uv_tracks(xy, obs, heights=np.zeros(2))

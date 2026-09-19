@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `b469bd4` on 2026-09-19.
+Synchronised from the project repository at commit `ccc719c` on 2026-09-19.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -44,7 +44,7 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/constraints/separation.py` | `992653d9252b5a0b` | 2397 |
 | `code/src/thz_opt/interferometry/__init__.py` | `e3b0c44298fc1c14` | 0 |
 | `code/src/thz_opt/interferometry/baselines.py` | `ab0062b5e24699be` | 1815 |
-| `code/src/thz_opt/interferometry/earth_rotation.py` | `f3dcdc3e846bf8b6` | 5059 |
+| `code/src/thz_opt/interferometry/earth_rotation.py` | `1d8914658e118c50` | 6002 |
 | `code/src/thz_opt/interferometry/gridding.py` | `863330944eefc5a1` | 6444 |
 | `code/src/thz_opt/interferometry/multifrequency.py` | `a44f762310953d83` | 5716 |
 | `code/src/thz_opt/interferometry/psf.py` | `6da76f65d5aa87ae` | 3112 |
@@ -63,7 +63,7 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/optimize/science_cases.py` | `adbdc88dd97221d4` | 7261 |
 | `code/src/thz_opt/optimize/state.py` | `75cbf0bfe64b6337` | 7249 |
 | `code/src/thz_opt/qubo/__init__.py` | `e3b0c44298fc1c14` | 0 |
-| `code/src/thz_opt/qubo/baseline_qubo.py` | `cf61fe01a6c5b867` | 24621 |
+| `code/src/thz_opt/qubo/baseline_qubo.py` | `4595b8cef7fba6ed` | 25300 |
 | `code/src/thz_opt/qubo/coefficients.py` | `7fe72f9ba4d5b08c` | 8604 |
 | `code/src/thz_opt/qubo/exhaustive.py` | `cbf3169072fff3e4` | 2496 |
 | `code/src/thz_opt/qubo/multiepoch.py` | `fd854ce1dc88ee0c` | 10036 |
@@ -78,6 +78,7 @@ python paper/sync_code.py --check
 | `code/tests/test_coherence.py` | `1ca3ca70be3bedf3` | 6361 |
 | `code/tests/test_extensions.py` | `4b91a71bc2cbb436` | 9752 |
 | `code/tests/test_geometries.py` | `7513a8ab9a7738b1` | 6444 |
+| `code/tests/test_ladakh_design.py` | `7a987f3ef8731fd2` | 11144 |
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
 | `code/tests/test_optimize.py` | `019c131fe3eb422a` | 2528 |
 | `code/tests/test_qubo.py` | `a947af5ae1b34591` | 6969 |
@@ -85,7 +86,7 @@ python paper/sync_code.py --check
 | `code/tests/test_real_arrays.py` | `007aef074c486fb6` | 3845 |
 | `code/tests/test_robust_cable_sparse.py` | `4a8378fd0f020f4d` | 6094 |
 | `code/tests/test_science.py` | `66f96805fa227621` | 4980 |
-| `code/tests/test_uv.py` | `00bcb1a5f65b6987` | 5035 |
+| `code/tests/test_uv.py` | `ca502923bd599d7a` | 7825 |
 | `data/exp06_shootout.csv` | `7b7a2b3cf1815451` | 3579 |
 | `data/exp07_formulations.csv` | `139af6d1b1a656aa` | 1278 |
 | `data/exp08_certified_instance.csv` | `1e3894a8b3e343e3` | 496 |
@@ -118,4 +119,4 @@ python paper/sync_code.py --check
 | `figures/fig27_science_weight_derivation.png` | `7041e2d9ed199705` | 146103 |
 | `figures/fig28_science_vs_cellcount.png` | `dc3683ea6c406de8` | 70796 |
 
-107 files.
+108 files.

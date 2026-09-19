@@ -40,22 +40,38 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / "outputs"
 SITES = ["hanle", "site_a"]
 
-# Two configurations, not one.
+# Three configurations, not one, and not two.
 #
 # A single 16-antenna array cannot do both jobs. Spread over 3 km it reaches
-# 0.09 arcsec, but its shortest baseline is around 250 m, so it is blind to
-# anything wider than about 0.6 arcsec: the first design run produced exactly
-# one baseline under 300 m out of 120. Concentrated enough to see extended
-# emission, it loses the resolution entirely. This is not a defect of the
-# optimiser, it is what sixteen antennas buy, and every real observatory
-# answers it the same way -- by moving antennas between configurations on a
-# shared pad field. ALMA does it, the VLA does it, and Section 4.5 of the
-# manuscript measures what reconfiguration is worth.
+# 0.10 arcsec but its shortest baseline is a few hundred metres, so it is blind
+# to anything wider than about half an arcsecond: the first design run produced
+# exactly one baseline under 300 m out of 120. Concentrated enough to see
+# extended emission, it loses the resolution entirely. That is not a defect of
+# the optimiser, it is what sixteen antennas buy, and every real observatory
+# answers it by moving antennas between configurations on a shared pad field.
 #
-# The compact configuration uses a finer candidate lattice because its whole
-# purpose is short baselines, and a 120 m grid cannot express a 30 m spacing.
+# Two configurations are not enough either. They only give continuous coverage
+# if they overlap -- the smaller array must *resolve* finer than the larger one
+# can *see*:
+#
+#     lambda / b_max(small)  <  0.6 lambda / b_min(large)
+#
+# With a 400 m compact array that failed at Hanle, leaving structures between
+# 0.48 and 0.69 arcsec sampled well by neither. Widening the compact array to
+# 800 m closed the gap but spread its own pads, pushing its shortest baseline
+# from 32 m to 90 m and collapsing its largest recoverable scale from 5.0 to
+# 2.5 arcsec. One array cannot be both the short-spacing array and the bridge.
+#
+# Three rungs fix it, which is why real arrays have several: compact keeps the
+# 32 m baselines and the 5 arcsec sensitivity, extended keeps the resolution,
+# and intermediate exists solely to join them. The overlap at each joint is
+# checked and printed at the end of the run rather than assumed.
+#
+# Finer candidate lattices go with the smaller configurations, because a 120 m
+# grid cannot express a 30 m spacing.
 CONFIGS = [
-    ("compact", dict(max_baseline_m=400.0, candidate_spacing_m=30.0)),
+    ("compact", dict(max_baseline_m=250.0, candidate_spacing_m=30.0)),
+    ("intermediate", dict(max_baseline_m=900.0, candidate_spacing_m=40.0)),
     ("extended", dict(max_baseline_m=3000.0, candidate_spacing_m=120.0)),
 ]
 
@@ -66,7 +82,8 @@ def write_pads_csv(path: Path, result) -> Path:
     Shares :func:`design.pad_table` with the CFG writer so the two files cannot
     disagree about which pad is which.
     """
-    rows = design.pad_table(result["xy"], result["elev"], result["site"])
+    rows = design.pad_table(result["xy"], result["elev"], result["site"],
+                            result.get("centre", (0.0, 0.0)))
     keys = ["pad_id", "latitude_deg", "longitude_deg", "elevation_m",
             "east_m", "north_m", "radius_from_centre_m"]
     fmt = {"latitude_deg": "{:.7f}", "longitude_deg": "{:.7f}",
@@ -202,12 +219,27 @@ def main() -> None:
 
     rows, results = [], {}
     for key in SITES:
+        # One array centre per site, chosen from the terrain and shared by
+        # every configuration, so the compact and extended arrays occupy the
+        # same pad field and antennas can be moved between them. Derived from
+        # the LARGEST configuration, whose footprint is the binding constraint;
+        # taking it from whichever configuration happens to run first would let
+        # a 200 m compact array pick a centre the 3 km array cannot use.
+        widest = DesignSpec(**max(CONFIGS, key=lambda c: c[1]["max_baseline_m"])[1])
+        probe = design.design_site(key, widest, centre=None, probe_only=True)
+        centre = probe["centre"]
+        ci = probe["array_centre"]
+        print("")
+        print(f"=== {key}: array centre {ci['moved_m']:.0f} m from the site marker")
+        print(f"    ground at {ci.get('landform_elevation_m', 0):.0f} m; "
+              f"marker sits at {ci.get('site_marker_elevation_m', 0):.0f} m")
+
         for cname, overrides in CONFIGS:
             spec = DesignSpec(**overrides)
             tag = f"{key}_{cname}"
             print("")
             print(f"--- {key} / {cname} configuration " + "-" * 34)
-            r = design.design_site(key, spec)
+            r = design.design_site(key, spec, centre=centre)
             rep = r["report"]
             rep["configuration"] = cname
             rep["site_key"] = key
@@ -227,7 +259,7 @@ def main() -> None:
 
             write_pads_csv(OUT / f"{tag}_pads.csv", r)
             design.write_cfg(OUT / f"{tag}_array.cfg", r["xy"], r["elev"],
-                             spec, r["site"])
+                             spec, r["site"], r["centre"])
             (OUT / f"{tag}_report.json").write_text(
                 json.dumps({"spec": spec.as_dict(), "report": rep},
                            indent=2, default=str), encoding="utf-8")
@@ -238,18 +270,35 @@ def main() -> None:
 
     print("")
     print("=" * 76)
-    print("What the two configurations achieve together")
+    print("What the configurations achieve together")
     print("=" * 76)
     for key in SITES:
-        c = results[f"{key}_compact"]["report"]
-        e = results[f"{key}_extended"]["report"]
-        span = c["largest_angular_scale_arcsec"] / e["resolution_arcsec"]
-        print(f"  {c['site'][:46]}")
-        print(f"    finest detail (extended)   {e['resolution_arcsec']:.3f} arcsec")
-        print(f"    widest structure (compact) {c['largest_angular_scale_arcsec']:.2f} arcsec")
-        print(f"    range of angular scales    {span:.0f}x")
+        chain = [results[f"{key}_{c}"]["report"] for c, _ in CONFIGS]
+        finest = min(r["resolution_arcsec"] for r in chain)
+        widest = max(r["largest_angular_scale_arcsec"] for r in chain)
+        print(f"  {chain[0]['site'][:46]}")
+        print(f"    finest detail              {finest:.3f} arcsec "
+              f"({CONFIGS[-1][0]})")
+        print(f"    widest structure           {widest:.2f} arcsec "
+              f"({CONFIGS[0][0]})")
+        print(f"    range of angular scales    {widest / finest:.0f}x")
+        continuous = True
+        for (small, _), (large, _) in zip(CONFIGS, CONFIGS[1:]):
+            rs = results[f"{key}_{small}"]["report"]["resolution_arcsec"]
+            ll = results[f"{key}_{large}"]["report"]["largest_angular_scale_arcsec"]
+            gap = rs - ll
+            if gap < 0:
+                print(f"    {small} / {large:<13} overlap "
+                      f"{-gap:.2f} arcsec ({small} resolves {rs:.2f}\", "
+                      f"{large} sees {ll:.2f}\")")
+            else:
+                continuous = False
+                print(f"    {small} / {large:<13} GAP of {gap:.2f} arcsec: "
+                      f"structures here are poorly sampled by both")
+        print(f"    coverage                   "
+              f"{'continuous' if continuous else 'HAS GAPS'}")
         print(f"    worst ground relief        "
-              f"{max(c['elevation_spread_m'], e['elevation_spread_m']):.0f} m")
+              f"{max(r['elevation_spread_m'] for r in chain):.0f} m")
 
     figure_comparison([results[f"{k}_extended"] for k in SITES])
     with (OUT / "site_comparison.csv").open("w", newline="", encoding="utf-8") as fh:

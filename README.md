@@ -297,10 +297,12 @@ metrics for Hanle and for the best-PWV candidate in Ladakh, on real terrain
 from SRTM/ASTER elevation data.
 
 Two results worth knowing before reading it. The project note describes Hanle
-as low-PWV and comparable to Chajnantor; twenty years of measurement say it is
-below 1 mm about 5 % of the time against ALMA's ~50 %. And Hanle's compact and
-extended configurations land on different landforms 220 m apart vertically, so
-they are not a shared reconfigurable pad field there. See that folder's README.
+as low-PWV and comparable to Chajnantor; measurement says it is below 1 mm about
+5 % of the time against ALMA's ~50 %. And a published site coordinate names a
+building, not an array: centring the design on Hanle's observatory put one
+configuration on the summit and another on the plain 220 m below. Choosing the
+centre from the terrain instead moves it 2 km and holds every configuration
+within 15 m of relief. See that folder's README.
 
 ## 11. Current limitations
 
