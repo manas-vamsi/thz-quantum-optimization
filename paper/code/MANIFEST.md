@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `ccc719c` on 2026-09-19.
+Synchronised from the project repository at commit `cd4149b` on 2026-09-19.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -24,11 +24,15 @@ python paper/sync_code.py --check
 | `code/experiments/11_real_alma.py` | `beeaff0623433a10` | 17288 |
 | `code/experiments/12_qubo_solver.py` | `23bddcc64eb286ce` | 17844 |
 | `code/experiments/13_science_case.py` | `5ed874608c79f313` | 14100 |
+| `code/experiments/14_imaging_validation.py` | `df44a00dc6731899` | 15735 |
+| `code/experiments/15_instrumental_limits.py` | `655be427f0a7b297` | 15711 |
+| `code/experiments/16_factorial_layout.py` | `bc56f508c157ee67` | 12434 |
 | `code/experiments/common.py` | `6074ef5db54ecc6e` | 6643 |
 | `code/pytest.ini` | `3b3ffd97382ae1ec` | 61 |
 | `code/requirements.txt` | `a36ae851cbdc6027` | 665 |
 | `code/src/thz_opt/__init__.py` | `6af959cffcfd100f` | 987 |
 | `code/src/thz_opt/arrays/__init__.py` | `e3b0c44298fc1c14` | 0 |
+| `code/src/thz_opt/arrays/factorial.py` | `685662e2b3646c3f` | 5735 |
 | `code/src/thz_opt/arrays/fibonacci.py` | `766b1655ec8eff4a` | 4988 |
 | `code/src/thz_opt/arrays/geometries.py` | `f29d30261f1e6b2e` | 11929 |
 | `code/src/thz_opt/arrays/golden_spiral.py` | `7bcd83a5a5a2b756` | 2406 |
@@ -42,6 +46,12 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/constraints/phase.py` | `5425e803066341d0` | 5293 |
 | `code/src/thz_opt/constraints/pwv.py` | `cd9b4254f9c9dbee` | 2404 |
 | `code/src/thz_opt/constraints/separation.py` | `992653d9252b5a0b` | 2397 |
+| `code/src/thz_opt/imaging/__init__.py` | `85f921bb6b427e18` | 1917 |
+| `code/src/thz_opt/imaging/clean.py` | `44b9e1a61401b7aa` | 4410 |
+| `code/src/thz_opt/imaging/fidelity.py` | `a4273588a40724ea` | 3067 |
+| `code/src/thz_opt/imaging/instrument.py` | `da6d106165e9f000` | 9683 |
+| `code/src/thz_opt/imaging/simulate.py` | `dec6ad66a98ba354` | 4202 |
+| `code/src/thz_opt/imaging/sky.py` | `95a84f57bf83c02f` | 4705 |
 | `code/src/thz_opt/interferometry/__init__.py` | `e3b0c44298fc1c14` | 0 |
 | `code/src/thz_opt/interferometry/baselines.py` | `ab0062b5e24699be` | 1815 |
 | `code/src/thz_opt/interferometry/earth_rotation.py` | `1d8914658e118c50` | 6002 |
@@ -77,7 +87,9 @@ python paper/sync_code.py --check
 | `code/tests/test_baselines.py` | `ed6032641f46f51b` | 2116 |
 | `code/tests/test_coherence.py` | `1ca3ca70be3bedf3` | 6361 |
 | `code/tests/test_extensions.py` | `4b91a71bc2cbb436` | 9752 |
+| `code/tests/test_factorial.py` | `3577bd9df38ac24c` | 8016 |
 | `code/tests/test_geometries.py` | `7513a8ab9a7738b1` | 6444 |
+| `code/tests/test_imaging.py` | `daac8574412a0795` | 15105 |
 | `code/tests/test_ladakh_design.py` | `7a987f3ef8731fd2` | 11144 |
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
 | `code/tests/test_optimize.py` | `019c131fe3eb422a` | 2528 |
@@ -106,6 +118,12 @@ python paper/sync_code.py --check
 | `data/exp12_summary.json` | `603602269fa95ca8` | 7934 |
 | `data/exp13_science_case.csv` | `00bf6682fe4e578c` | 980 |
 | `data/exp13_summary.json` | `f9b2f8560c24b785` | 4443 |
+| `data/exp14_imaging.csv` | `7a107c1dcdf50215` | 3675 |
+| `data/exp14_summary.json` | `d4ccfa2eb2ee0460` | 11858 |
+| `data/exp15_instrumental.csv` | `96cbd9d3591fa33f` | 1803 |
+| `data/exp15_summary.json` | `1ea944f202d596bd` | 5518 |
+| `data/exp16_factorial.csv` | `c19a93031e755dad` | 9194 |
+| `data/exp16_summary.json` | `c0ad2561cf0286a5` | 38277 |
 | `figures/fig16_formulation_comparison.png` | `a96072f98354724f` | 120249 |
 | `figures/fig17_optimizer_comparison.png` | `43ae55addb5d1c09` | 102214 |
 | `figures/fig18_optimized_layout.png` | `027c2465288440cc` | 94933 |
@@ -118,5 +136,11 @@ python paper/sync_code.py --check
 | `figures/fig26_qubo_solver_convergence.png` | `9432aed491bbfe92` | 93752 |
 | `figures/fig27_science_weight_derivation.png` | `7041e2d9ed199705` | 146103 |
 | `figures/fig28_science_vs_cellcount.png` | `dc3683ea6c406de8` | 70796 |
+| `figures/fig29_imaging_comparison.png` | `de2c420a5056526f` | 92113 |
+| `figures/fig30_imaging_metric_agreement.png` | `c552977deb74e1bd` | 73530 |
+| `figures/fig31_field_of_view_limits.png` | `85218bf6ab0b7cad` | 106764 |
+| `figures/fig32_smearing_cost.png` | `d44d629b6c644316` | 148795 |
+| `figures/fig33_factorial_heatmap.png` | `0e349a0170ff1531` | 107093 |
+| `figures/fig34_factorial_variance.png` | `163868491b7b85a2` | 41835 |
 
-108 files.
+132 files.

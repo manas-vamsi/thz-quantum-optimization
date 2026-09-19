@@ -42,6 +42,9 @@ EXPERIMENTS = [
     "11_real_alma.py",
     "12_qubo_solver.py",
     "13_science_case.py",
+    "14_imaging_validation.py",
+    "15_instrumental_limits.py",
+    "16_factorial_layout.py",
 ]
 
 FIGURES = [
@@ -57,6 +60,12 @@ FIGURES = [
     "fig26_qubo_solver_convergence.png",
     "fig27_science_weight_derivation.png",
     "fig28_science_vs_cellcount.png",
+    "fig29_imaging_comparison.png",
+    "fig30_imaging_metric_agreement.png",
+    "fig31_field_of_view_limits.png",
+    "fig32_smearing_cost.png",
+    "fig33_factorial_heatmap.png",
+    "fig34_factorial_variance.png",
 ]
 
 DATA = [
@@ -79,6 +88,12 @@ DATA = [
     "exp12_summary.json",
     "exp13_science_case.csv",
     "exp13_summary.json",
+    "exp14_imaging.csv",
+    "exp14_summary.json",
+    "exp15_instrumental.csv",
+    "exp15_summary.json",
+    "exp16_factorial.csv",
+    "exp16_summary.json",
 ]
 
 PYTEST_INI = """[pytest]

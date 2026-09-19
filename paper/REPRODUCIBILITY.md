@@ -55,6 +55,9 @@ image, so a figure separated from this directory still states what produced it.
 | §4.2.2 | QUBO solved with an annealing sampler; formulation vs. solver gap | `code/experiments/12_qubo_solver.py` |
 | §4.3 | Science-case radial weightings (chosen by hand) | `code/src/thz_opt/optimize/science_cases.py` |
 | §4.3.1 | Fisher-information UV weight derived from a disc gap model | `code/src/thz_opt/science/disk_gap.py`, `code/experiments/13_science_case.py` |
+| §4.6.1 | Radial law crossed with angular law; two-way variance decomposition | `code/src/thz_opt/arrays/factorial.py`, `code/experiments/16_factorial_layout.py` |
+| §4.8 | Visibility prediction, CLEAN, restoring beam, image fidelity | `code/src/thz_opt/imaging/` |
+| §4.9 | Primary beam, bandwidth and time smearing, radiometer noise | `code/src/thz_opt/imaging/instrument.py` |
 | §4.4 | Multi-frequency synthesis, `a_ck = sum_f a_ckf` | `code/src/thz_opt/interferometry/multifrequency.py` |
 | §4.5, Eq. (8) | Multi-epoch selection and movement cost | `code/src/thz_opt/qubo/multiepoch.py` |
 | §5 | Scenario-mean robustness; star cable cost | `code/src/thz_opt/qubo/robust.py`, `constraints/cable.py` |
@@ -68,7 +71,7 @@ cd code
 python -m pytest
 ```
 
-175 checks. The ones that matter most for the manuscript's claims:
+249 checks. The ones that matter most for the manuscript's claims:
 
 | Check | What it establishes |
 |---|---|
@@ -86,6 +89,10 @@ python -m pytest
 | Below the Rosenberg floor, feasibility actually breaks | the previous check is informative, not vacuous |
 | Numerical Hankel transform against the analytic uniform disc | the science-derived weight rests on a correct transform |
 | Flux-conserving gap derivative integrates to zero | the weight measures shape, not total brightness |
+| Complete UV sampling returns the input sky to 1e-16 with a delta beam | the imaging transform pair is self-consistent |
+| Zero smearing is bit-exactly the identity | the no-smear limit leaks no flux to interpolation |
+| Removing short spacings loses extended flux | the fidelity metrics detect the failure cells cannot see |
+| ANOVA on pure row, pure column and pure interaction tables | variance is attributed to the right factor |
 
 ## Reproducing everything from scratch
 

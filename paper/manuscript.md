@@ -48,7 +48,15 @@ classical heuristic reaches 98% about a hundred times faster. Finally, replacing
 the cell-count metric with a Fisher-information weight derived from a
 protoplanetary-disc gap model tightens the Cramer-Rao bound on the measured
 parameter by 10% to 16%, and quantifies the resulting redundancy-versus-imaging
-trade-off. No quantum hardware was used and no quantum advantage is claimed.
+trade-off. End-to-end imaging with CLEAN deconvolution validates the central
+assumption of the framework and bounds it: occupied UV cells predict structural
+accuracy with a rank correlation of +1.000 against every sky model tested, but
+are uncorrelated with flux recovery for extended emission, where the
+cell-maximizing array recovers 42% of a smooth Gaussian against 91% for a
+golden spiral with 36% fewer cells. A factorial decomposition separates the two
+design choices that named layout families confound, and finds the radial law
+explains 84.6% of the variance in coverage against 11.2% for the angular law.
+No quantum hardware was used and no quantum advantage is claimed.
 
 **Index Terms:** terahertz interferometry; aperture synthesis; UV coverage;
 QUBO; quadratic optimization; quantum annealing; simulated annealing; Fisher
@@ -613,6 +621,65 @@ collapse the sampled position angles onto q directions. The operative property
 is therefore poor rational approximability rather than the golden ratio
 specifically.
 
+#### 4.6.1 Which factor is doing the work
+
+The comparison above is fair to those twelve objects and cannot say *why* any
+of them wins, because they differ in two ways simultaneously. A golden spiral
+changes both how radius grows with index and how bearing advances; so does
+phyllotaxis; so does a hierarchical array. The distinction is practical, since
+"space antennas uniformly in area" and "advance by the golden angle" are
+separate pieces of advice and neither can be read off a ranking of composites.
+
+Separating them requires a factorial design: five radial laws crossed with five
+angular laws, with N, radial extent, UV grid, declination, track length and the
+shadowing rule all held fixed, and each cell replicated with 12 m of positional
+jitter so that the decomposition has a genuine error term rather than nothing to
+test against. The radial laws are uniform-in-radius, uniform-in-area, a general
+power law, the exponential profile of a logarithmic spiral, and the Gaussian
+profile of Boone [9]; the angular laws are the golden angle, equal spacing, a
+low-order rational angle, uniform random bearings, and a fixed number of
+straight arms. Decomposing the variance of each score gives:
+
+| Source | Occupied UV cells | F | Peak sidelobe | F |
+|---|---:|---:|---:|---:|
+| **Radial law** | **84.6%** | 3049 | 35.7% | 82.9 |
+| Angular law | 11.2% | 404 | 31.9% | 73.9 |
+| Interaction | 3.5% | 31.5 | 21.6% | 12.5 |
+| Replication noise | 0.7% | -- | 10.8% | -- |
+
+For UV coverage the answer is not close: **the radial law explains seven and a
+half times more of the variance than the angular law**, and the interaction
+between them is smaller than the main effects, so the two choices are largely
+separable. The marginal means show what that means concretely.
+
+| Radial law | Mean cells | | Angular law | Mean cells |
+|---|---:|---|---|---:|
+| Uniform in area | **2054** | | Golden angle | **1497** |
+| Uniform in radius | 1635 | | Rational angle (5 bearings) | 1461 |
+| Power law | 1191 | | Multi-arm | 1393 |
+| Exponential | 1104 | | Uniform random | 1358 |
+| Gaussian | 761 | | Equal spacing | 1037 |
+
+Choosing uniform-in-area over the Gaussian profile is a factor of 2.7. The
+golden angle beats a uniformly random bearing by 10%, and beats a deliberately
+degenerate rational angle -- one that revisits only five distinct bearings --
+by 2.5%.
+
+**The golden angle is not what makes a golden spiral good.** The radial
+distribution is, and the angular law is a second-order correction. This
+strengthens the phyllotaxis sweep above from "the golden ratio is not special
+among irrationals" to the sharper statement that the angular constant is not
+where the performance comes from at all.
+
+Sidelobes behave differently and should not be assumed to follow. There the two
+factors contribute comparably (35.7% and 31.9%) and the interaction reaches
+21.6%, so for sidelobe control the radial and angular laws cannot be chosen
+independently even though for coverage they can.
+
+![Figure 10. Radial law crossed with angular law: mean occupied cells and peak sidelobe for every combination.](figures/fig33_factorial_heatmap.png)
+
+![Figure 11. Variance decomposition. The radial law dominates UV coverage; sidelobes divide more evenly and carry a large interaction term.](figures/fig34_factorial_variance.png)
+
 ### 4.7 Real pad geometry: the published ALMA pad list
 
 Sections 4.1 to 4.6 use synthetic candidate pads so that N, radial extent and
@@ -688,9 +755,120 @@ opacity context: medians of 3.05 mm in January, 0.88 mm in June, 0.70 mm in
 August and 1.64 mm in December [18], against a twenty-year year-round median
 near 1 mm [19].
 
-![Figure 10. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
+![Figure 12. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
 
-![Figure 11. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
+![Figure 13. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
+
+### 4.8 End-to-end imaging: testing the assumption everything rests on
+
+Every result above ranks arrays by a *predictor* of image quality -- occupied UV
+cells, sidelobe energy, a Cramér-Rao bound. None of them is an image. The
+framework assumes that improving those numbers improves the picture, and that
+assumption is worth testing rather than inheriting.
+
+The loop is closed by observing sky models with each array's real coverage,
+adding noise, deconvolving with Högbom CLEAN [22], restoring with a fitted
+Gaussian beam, and comparing with the truth. The forward and inverse transforms
+are exact inverses, so a completely sampled grid returns the input sky to one
+part in 10^16 and yields a delta-function beam; that round trip is verified
+first, because an inconsistent transform pair would bias every fidelity number
+by the same silent factor rather than failing visibly.
+
+Five feasible selections of the real ALMA pads were scored against four sky
+models: a point source, a close double, a smooth Gaussian, and the disc with a
+gap from Section 4.3.1. Ranking the arrays twice -- once by occupied cells and
+once by image fidelity -- gives two different answers to two different
+questions.
+
+| Sky model | rho(cells, structural accuracy) | rho(cells, flux accuracy) |
+|---|---:|---:|
+| Point source | **+1.000** | +1.000 |
+| Close double | **+1.000** | +0.600 |
+| Smooth Gaussian | **+1.000** | **0.000** |
+| Disc with gap | **+1.000** | +0.300 |
+
+**Occupied UV cells predict structural accuracy perfectly.** The array touching
+the most cells produced the lowest relative RMS error against every sky model
+tested, with a rank correlation of exactly +1.000 in each case. The cheap metric
+this project optimizes throughout is validated for that purpose, which is the
+result the rest of the manuscript needed.
+
+**It says almost nothing about flux.** On a smooth Gaussian the correlation is
+exactly zero, and the failure is not subtle:
+
+| Array | Occupied cells | Gaussian flux recovered |
+|---|---:|---:|
+| Searched, maximum cells | 5204 | **42%** |
+| Golden spiral, snapped to pads | 3350 | **91%** |
+
+The cell-maximizing array has 55% more cells and recovers less than half the
+source. Maximizing cells drives antennas toward long baselines, which resolves
+extended emission out; no cell count, and no objective built on one, can detect
+that happening.
+
+This qualifies the headline of Section 4.7 rather than overturning it. The
+10.1% improvement from search is a real gain in *structural* accuracy and is not
+a gain in flux recovery, and a design intended for extended emission should be
+scored on the latter. It also supplies the imaging-domain version of the
+argument in Section 4.3.1: an objective has to name what is being measured.
+
+![Figure 14. Reconstructions of the disc with a gap, with each array's dirty beam.](figures/fig29_imaging_comparison.png)
+
+![Figure 15. Occupied cells against image error and against flux recovery. The first is a perfect predictor; the second is uncorrelated for extended emission.](figures/fig30_imaging_metric_agreement.png)
+
+### 4.9 Instrumental limits: primary beam, smearing, and real sensitivity
+
+Three effects were absent from the model used above, and all three worsen
+exactly where this work pushes -- long baselines at short wavelengths. Each
+antenna sees only a patch of sky about 1.13 lambda/D across; a finite channel
+width stretches the response radially in proportion to distance from the phase
+centre; a finite integration smears it tangentially. Both smearing terms vanish
+at the phase centre and grow linearly away from it, so they define a field of
+view rather than a uniform loss, and they are implemented here as averages over
+a geometric transform of the sky rather than as a fixed convolution, which is
+what they physically are.
+
+Which effect binds the usable field is not fixed, and cannot be assumed:
+
+| Observing setup | Bandwidth limit | Time limit | Primary beam | Binding |
+|---|---:|---:|---:|---|
+| Spectral line (0.05%, 2 s) | 108" | 427" | 9.7" | primary beam |
+| Narrow continuum (1%, 6 s) | 5.4" | 142" | 9.7" | **bandwidth** |
+| Wide continuum (8%, 30 s) | **0.67"** | 28" | 9.7" | **bandwidth** |
+
+Measured across the field with identical sources at increasing radius, using
+12 m dishes at 300 GHz:
+
+| Setup | 0" | 2.5" | 5" | 10" | 15" |
+|---|---:|---:|---:|---:|---:|
+| Idealised | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Spectral line | 1.000 | 0.998 | 0.997 | 0.993 | 0.990 |
+| Narrow continuum | 0.997 | 0.972 | 0.944 | 0.889 | 0.838 |
+| Wide continuum | 0.980 | 0.781 | 0.559 | 0.293 | 0.202 |
+| Wide continuum + primary beam | 0.980 | 0.749 | 0.463 | **0.138** | **0.039** |
+
+The phase centre is untouched in every case, which is why a compact source
+placed there measures nothing and why the probe has to span the field.
+
+The design consequence is a tension the coverage objectives cannot express.
+Both smearing radii are proportional to the synthesised beam, and the beam
+shrinks as the array grows, so **extending an array for resolution shrinks its
+usable field in exact proportion**. Every objective in Sections 2.4 and 4.3
+rewards longer baselines without seeing that cost.
+
+Finally, replacing the arbitrary signal-to-noise scale with the radiometer
+equation and the measured zenith opacity puts sensitivity in physical units. For
+twenty 12 m antennas with 8 GHz of bandwidth at 60 degrees elevation:
+
+| Site and condition | zenith tau | T_sys | SEFD | 1 h point-source rms |
+|---|---:|---:|---:|---:|
+| Hanle, best winter decile | 0.06 | 86 K | 3001 Jy | 0.029 mJy |
+| Chajnantor, 1 mm PWV | 0.10 | 103 K | 3575 Jy | 0.034 mJy |
+| Hanle, typical | 0.15 | 124 K | 4332 Jy | 0.041 mJy |
+
+![Figure 16. Which limit binds the field of view, and how the usable field shrinks as the array is extended.](figures/fig31_field_of_view_limits.png)
+
+![Figure 17. Response against distance from the phase centre, with and without the primary beam.](figures/fig32_smearing_cost.png)
 
 ## 5. Discussion
 
@@ -709,6 +887,25 @@ therefore clear that specific bar, not an unoptimized straw man, and must
 account for the embedding cost of a dense coupling graph that already reaches
 33 689 couplings at M=40 and would reach roughly 15 000 variables at the full
 174-pad ALMA field.
+
+Two results bound how far the coverage objectives can be trusted. Section 4.8
+validates them for what they were built for -- occupied cells predict structural
+image accuracy perfectly -- and shows they carry no information about flux on
+extended sources, so an array optimized on cell count alone can lose more than
+half of a smooth source while scoring well. Section 4.9 adds a cost none of them
+can see: both smearing radii scale with the synthesised beam, so every extra
+metre of baseline that improves resolution shrinks the usable field in
+proportion. A complete objective would carry a flux term and a field-of-view
+term, and none of the formulations in Section 2.4 does.
+
+Section 4.6.1 is a caution about attribution rather than about optimization.
+Ranking named layout families cannot say which of their two design choices is
+responsible, and when they are separated the answer for coverage is lopsided:
+the radial law carries 84.6% of the variance and the angular law 11.2%. The
+golden angle, the property this literature is usually organised around, beats a
+deliberately degenerate rational angle by 2.5%. Sidelobes divide more evenly and
+carry a 21.6% interaction, so the separability does not transfer between
+objectives and has to be measured for each.
 
 There is a structural lesson in where the QUBO route is *not* penalized. The
 Fisher objective of Section 4.3.1 is linear in the baseline-activation variables
@@ -751,10 +948,19 @@ medians over thousands of observations at a 120 s timescale, so they describe th
 site rather than a particular night, and the source memo notes that its sample
 omits the very worst conditions, in which no observation was attempted. The
 model is coplanar, with no w term, primary beam, noise, time or bandwidth
-smearing, polarization, mosaicking, or end-to-end reconstruction. No image is
-reconstructed anywhere in this work: UV coverage and the Cramér-Rao bound are
-both predictors of image quality, not measurements of it, and an end-to-end
-imaging study remains the natural next validation.
+polarization or mosaicking. Imaging, the primary beam, bandwidth and time
+smearing and a radiometric noise scale are now present (Sections 4.8 and 4.9)
+but only as a *diagnostic* layer: no optimization in this work selects a layout
+under them, so the arrays compared are still chosen by coverage objectives and
+then measured under the fuller model. Folding flux recovery and the field-of-view
+cost into the objective itself is the natural next step, and it is not a
+quadratic one.
+
+Deconvolution uses Högbom CLEAN, chosen for transparency rather than
+performance; a multi-scale algorithm would recover extended flux better and
+would narrow, though not close, the gap reported in Section 4.8. Noise is white
+and Gaussian on gridded visibilities, which omits calibration error, pointing
+error, and atmospheric phase as a time series.
 
 ## 6. Conclusion
 
@@ -778,9 +984,18 @@ optimizing for parameter estimation drives an array toward redundancy while
 optimizing for imaging drives it toward diversity -- a trade-off that a
 cell-count objective cannot express at all.
 
-The natural next steps are an end-to-end imaging validation, per-baseline noise
-and atmospheric correlation in the Fisher sum, and a hardware annealing run
-measured against the classical bar established here.
+Two further results bound the framework from outside. End-to-end imaging
+confirms that occupied UV cells predict structural accuracy perfectly and that
+they are uncorrelated with flux recovery on extended emission, so the coverage
+objectives are sound for what they measure and silent about what they do not.
+Separating the radial from the angular law shows that the radial distribution
+carries 84.6% of the variance in coverage while the golden angle -- the feature
+this literature is usually built around -- contributes a few per cent.
+
+The natural next steps are objectives that carry flux and field of view rather
+than coverage alone, per-baseline noise and atmospheric correlation in the
+Fisher sum, and a hardware annealing run measured against the classical bar
+established here.
 
 ## Reproducibility
 
@@ -795,6 +1010,9 @@ The associated repository contains all code and outputs. Key scripts are:
 - experiments/11_real_alma.py
 - experiments/12_qubo_solver.py
 - experiments/13_science_case.py
+- experiments/14_imaging_validation.py
+- experiments/15_instrumental_limits.py
+- experiments/16_factorial_layout.py
 
 Run the suite with:
 
@@ -966,4 +1184,12 @@ Journal Letters*, vol. 808, L3, 2015, doi: 10.1088/2041-8205/808/1/L3.
 
 [21] S. M. Kay, *Fundamentals of Statistical Signal Processing: Estimation
 Theory*. Englewood Cliffs, NJ: Prentice Hall, 1993.
+
+[22] J. A. Högbom, "Aperture synthesis with a non-regular distribution of
+interferometer baselines," *Astronomy and Astrophysics Supplement*, vol. 15,
+pp. 417-426, 1974.
+
+[23] A. R. Thompson, J. M. Moran, and G. W. Swenson, *Interferometry and
+Synthesis in Radio Astronomy*, 3rd ed. Cham: Springer, 2017,
+doi: 10.1007/978-3-319-44431-4.
 

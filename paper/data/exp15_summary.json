@@ -1,0 +1,169 @@
+{
+  "array": {
+    "b_max_m": 381.83756048482996,
+    "dish_m": 12.0,
+    "frequency_ghz": 300.0,
+    "n_select": 20,
+    "uv_cells": 5204
+  },
+  "field_limits": [
+    {
+      "bandwidth_field_arcsec": 107.96324521732059,
+      "beam_arcsec": 0.539816226086603,
+      "binding_limit": "primary beam",
+      "fractional_bandwidth": 0.0005,
+      "integration_s": 2.0,
+      "primary_half_arcsec": 9.704916053887938,
+      "setup": "spectral line",
+      "time_field_arcsec": 427.3972708580071,
+      "usable_field_arcsec": 9.704916053887938
+    },
+    {
+      "bandwidth_field_arcsec": 5.398162260866029,
+      "beam_arcsec": 0.539816226086603,
+      "binding_limit": "bandwidth smearing",
+      "fractional_bandwidth": 0.01,
+      "integration_s": 6.0,
+      "primary_half_arcsec": 9.704916053887938,
+      "setup": "narrow continuum",
+      "time_field_arcsec": 142.46575695266904,
+      "usable_field_arcsec": 5.398162260866029
+    },
+    {
+      "bandwidth_field_arcsec": 0.6747702826082537,
+      "beam_arcsec": 0.539816226086603,
+      "binding_limit": "bandwidth smearing",
+      "fractional_bandwidth": 0.08,
+      "integration_s": 30.0,
+      "primary_half_arcsec": 9.704916053887938,
+      "setup": "wide continuum",
+      "time_field_arcsec": 28.493151390533807,
+      "usable_field_arcsec": 0.6747702826082537
+    }
+  ],
+  "imaging": [
+    {
+      "fractional_bandwidth": 0.0,
+      "integration_s": 0.0,
+      "primary_beam": false,
+      "response_at_0as": 1.0,
+      "response_at_10as": 1.0,
+      "response_at_15as": 1.0,
+      "response_at_1as": 1.0,
+      "response_at_2.5as": 1.0,
+      "response_at_5as": 1.0,
+      "setup": "none (idealised)"
+    },
+    {
+      "fractional_bandwidth": 0.0,
+      "integration_s": 0.0,
+      "primary_beam": true,
+      "response_at_0as": 1.0,
+      "response_at_10as": 0.47083560388283485,
+      "response_at_15as": 0.1947849865244581,
+      "response_at_1as": 0.9916885137967848,
+      "response_at_2.5as": 0.9586274715577623,
+      "response_at_5as": 0.8283565755005186,
+      "setup": "none (idealised)"
+    },
+    {
+      "fractional_bandwidth": 0.0005,
+      "integration_s": 2.0,
+      "primary_beam": false,
+      "response_at_0as": 0.9998572649711835,
+      "response_at_10as": 0.9932997279895991,
+      "response_at_15as": 0.9901765717560458,
+      "response_at_1as": 0.9992038565679744,
+      "response_at_2.5as": 0.9983381213374443,
+      "response_at_5as": 0.9965998184872961,
+      "setup": "spectral line"
+    },
+    {
+      "fractional_bandwidth": 0.0005,
+      "integration_s": 2.0,
+      "primary_beam": true,
+      "response_at_0as": 0.9998572649711835,
+      "response_at_10as": 0.4676808772646384,
+      "response_at_15as": 0.19287153018633554,
+      "response_at_1as": 0.9908989874999103,
+      "response_at_2.5as": 0.9570343490174404,
+      "response_at_5as": 0.8255400127865743,
+      "setup": "spectral line"
+    },
+    {
+      "fractional_bandwidth": 0.01,
+      "integration_s": 6.0,
+      "primary_beam": false,
+      "response_at_0as": 0.997244119816976,
+      "response_at_10as": 0.8892906389120072,
+      "response_at_15as": 0.8379309033075173,
+      "response_at_1as": 0.9860941219648142,
+      "response_at_2.5as": 0.9720459312269661,
+      "response_at_5as": 0.9436096714531343,
+      "setup": "narrow continuum"
+    },
+    {
+      "fractional_bandwidth": 0.01,
+      "integration_s": 6.0,
+      "primary_beam": true,
+      "response_at_0as": 0.997244119816976,
+      "response_at_10as": 0.41870969499948707,
+      "response_at_15as": 0.16321635970918177,
+      "response_at_1as": 0.9778982142750325,
+      "response_at_2.5as": 0.9318299332901167,
+      "response_at_5as": 0.7816452760540881,
+      "setup": "narrow continuum"
+    },
+    {
+      "fractional_bandwidth": 0.08,
+      "integration_s": 30.0,
+      "primary_beam": false,
+      "response_at_0as": 0.9797580590265572,
+      "response_at_10as": 0.2925345220192387,
+      "response_at_15as": 0.2015088385025622,
+      "response_at_1as": 0.8914488085106743,
+      "response_at_2.5as": 0.7808053210261914,
+      "response_at_5as": 0.5587905703539142,
+      "setup": "wide continuum"
+    },
+    {
+      "fractional_bandwidth": 0.08,
+      "integration_s": 30.0,
+      "primary_beam": true,
+      "response_at_0as": 0.9797580590265572,
+      "response_at_10as": 0.13773566833150463,
+      "response_at_15as": 0.039250896392280764,
+      "response_at_1as": 0.8840395440378648,
+      "response_at_2.5as": 0.7485014306741845,
+      "response_at_5as": 0.46287784328035003,
+      "setup": "wide continuum"
+    }
+  ],
+  "primary_beam_arcsec": 19.409832107775877,
+  "sensitivity": [
+    {
+      "condition": "Hanle, best winter decile",
+      "hours_for_0p1mjy": 0.08230018743120965,
+      "sefd_jy": 3001.15519633217,
+      "sigma_1h_mjy": 0.028688009242749776,
+      "t_sys_k": 86.04499020041133,
+      "tau_zenith": 0.06
+    },
+    {
+      "condition": "Hanle, typical",
+      "hours_for_0p1mjy": 0.17144626049968728,
+      "sefd_jy": 4331.636959520705,
+      "sigma_1h_mjy": 0.04140606966372047,
+      "t_sys_k": 124.19073168532208,
+      "tau_zenith": 0.15
+    },
+    {
+      "condition": "Chajnantor, 1 mm PWV",
+      "hours_for_0p1mjy": 0.116811230146852,
+      "sefd_jy": 3575.446968879763,
+      "sigma_1h_mjy": 0.034177657928367765,
+      "t_sys_k": 102.51029329484192,
+      "tau_zenith": 0.1
+    }
+  ]
+}
