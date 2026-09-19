@@ -1,0 +1,5 @@
+site,site_key,configuration,site_latitude_deg,pwv_below_1mm_fraction,n_antennas,baselines,baseline_min_m,baseline_max_m,resolution_arcsec,largest_angular_scale_arcsec,uv_cells_occupied,peak_sidelobe,elevation_spread_m,candidates
+"Indian Astronomical Observatory, Hanle",hanle,compact,32.7794,0.05,16,120,32.195530054446564,328.3327757201446,0.8188488847750137,5.010414677668459,1342,0.13301715259561556,30.0,36
+"Indian Astronomical Observatory, Hanle",hanle,extended,32.7794,0.05,16,120,251.9938801861969,2949.5783631347067,0.09115029137513596,0.6401463250652031,2164,0.09617206322936589,31.0,313
+Ladakh candidate site A (unbuilt),site_a,compact,34.25,0.23,16,120,31.65285399713929,369.65621815377045,0.7273107120348404,5.09631631810181,1878,0.10074678828073101,22.0,123
+Ladakh candidate site A (unbuilt),site_a,extended,34.25,0.23,16,120,126.61141599117241,2738.447599645542,0.09817786079541013,1.2740790794991355,1872,0.12366274234984286,57.0,118

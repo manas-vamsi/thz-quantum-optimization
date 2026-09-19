@@ -288,6 +288,20 @@ With `sum_i x_i = N` and a pairwise reward this is exactly
 **densest-k-subgraph**: NP-hard, no known constant-factor approximation. That
 is the structural reason a QUBO solver is worth trying here at all.
 
+## 10b. Ladakh array design
+
+`ladakh_array_design/` applies the same machinery to a different question: not
+"which of ALMA's existing pads should we use" but "where would pads go at an
+Indian site". It produces pad coordinates, CASA configuration files and UV
+metrics for Hanle and for the best-PWV candidate in Ladakh, on real terrain
+from SRTM/ASTER elevation data.
+
+Two results worth knowing before reading it. The project note describes Hanle
+as low-PWV and comparable to Chajnantor; twenty years of measurement say it is
+below 1 mm about 5 % of the time against ALMA's ~50 %. And Hanle's compact and
+extended configurations land on different landforms 220 m apart vertically, so
+they are not a shared reconfigurable pad field there. See that folder's README.
+
 ## 11. Current limitations
 
 - No quantum **hardware**. The QUBO is solved with `dwave-samplers`' classical

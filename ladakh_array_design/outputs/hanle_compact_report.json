@@ -1,0 +1,60 @@
+{
+  "spec": {
+    "n_antennas": 16,
+    "dish_diameter_m": 8.0,
+    "max_baseline_m": 400.0,
+    "frequency_ghz": 230.0,
+    "wavelength_mm": 1.3034454695652173,
+    "target_resolution_arcsec": 0.6721,
+    "min_pad_separation_m": 12.0,
+    "declination_deg": 30.0,
+    "track_hours": 4.0,
+    "max_slope_deg": 10.0,
+    "candidate_spacing_m": 30.0,
+    "uv_taper_sigma_fraction": 0.5,
+    "max_elevation_spread_m": 60.0,
+    "objective": "gaussian target UV density"
+  },
+  "report": {
+    "n_antennas": 16,
+    "baselines": 120,
+    "baseline_min_m": 32.195530054446564,
+    "baseline_max_m": 328.3327757201446,
+    "baseline_median_m": 143.99135974466213,
+    "resolution_arcsec": 0.8188488847750137,
+    "largest_angular_scale_arcsec": 5.010414677668459,
+    "psf_fwhm_arcsec": 0.48714069625090417,
+    "peak_sidelobe": 0.13301715259561556,
+    "uv_cells_occupied": 1342,
+    "uv_fill_fraction": 0.32763671875,
+    "uv_samples_outside_grid": 0,
+    "elevation_min_m": 4474.0,
+    "elevation_max_m": 4504.0,
+    "elevation_spread_m": 30.0,
+    "pads_inside_half_radius": 7,
+    "coherence_model_mean": 0.9935230985552905,
+    "coherence_model_note": "transferred from ALMA Memo 624; no phase measurement exists for any Ladakh site",
+    "site": "Indian Astronomical Observatory, Hanle",
+    "site_latitude_deg": 32.7794,
+    "pwv_below_1mm_fraction": 0.05,
+    "candidates": 36,
+    "optimise_seconds": 3.9,
+    "terrain": {
+      "origin_lat": 32.7794,
+      "origin_lon": 78.9642,
+      "zoom": 13,
+      "tiles_fetched": 4,
+      "pixel_m": 16.1,
+      "grid": [
+        149,
+        149
+      ],
+      "elev_min_m": 4256.0,
+      "elev_max_m": 4506.0,
+      "elev_at_origin_m": 4490.0,
+      "source": "AWS Terrain Tiles (Tilezen terrarium), SRTM/ASTER derived"
+    },
+    "configuration": "compact",
+    "site_key": "hanle"
+  }
+}

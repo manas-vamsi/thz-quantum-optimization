@@ -1,0 +1,60 @@
+{
+  "spec": {
+    "n_antennas": 16,
+    "dish_diameter_m": 8.0,
+    "max_baseline_m": 400.0,
+    "frequency_ghz": 230.0,
+    "wavelength_mm": 1.3034454695652173,
+    "target_resolution_arcsec": 0.6721,
+    "min_pad_separation_m": 12.0,
+    "declination_deg": 30.0,
+    "track_hours": 4.0,
+    "max_slope_deg": 10.0,
+    "candidate_spacing_m": 30.0,
+    "uv_taper_sigma_fraction": 0.5,
+    "max_elevation_spread_m": 60.0,
+    "objective": "gaussian target UV density"
+  },
+  "report": {
+    "n_antennas": 16,
+    "baselines": 120,
+    "baseline_min_m": 31.65285399713929,
+    "baseline_max_m": 369.65621815377045,
+    "baseline_median_m": 200.53779368003362,
+    "resolution_arcsec": 0.7273107120348404,
+    "largest_angular_scale_arcsec": 5.09631631810181,
+    "psf_fwhm_arcsec": 0.3982696338639374,
+    "peak_sidelobe": 0.10074678828073101,
+    "uv_cells_occupied": 1878,
+    "uv_fill_fraction": 0.45849609375,
+    "uv_samples_outside_grid": 0,
+    "elevation_min_m": 4601.0,
+    "elevation_max_m": 4623.0,
+    "elevation_spread_m": 22.0,
+    "pads_inside_half_radius": 3,
+    "coherence_model_mean": 0.9915362503571975,
+    "coherence_model_note": "transferred from ALMA Memo 624; no phase measurement exists for any Ladakh site",
+    "site": "Ladakh candidate site A (unbuilt)",
+    "site_latitude_deg": 34.25,
+    "pwv_below_1mm_fraction": 0.23,
+    "candidates": 123,
+    "optimise_seconds": 6.1,
+    "terrain": {
+      "origin_lat": 34.25,
+      "origin_lon": 78.75,
+      "zoom": 13,
+      "tiles_fetched": 2,
+      "pixel_m": 15.8,
+      "grid": [
+        151,
+        152
+      ],
+      "elev_min_m": 4517.0,
+      "elev_max_m": 4819.0,
+      "elev_at_origin_m": 4612.0,
+      "source": "AWS Terrain Tiles (Tilezen terrarium), SRTM/ASTER derived"
+    },
+    "configuration": "compact",
+    "site_key": "site_a"
+  }
+}

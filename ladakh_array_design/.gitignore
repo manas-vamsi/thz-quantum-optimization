@@ -1,0 +1,2 @@
+# Cached elevation tiles, re-downloaded on demand from AWS Terrain Tiles.
+data/dem_cache/
