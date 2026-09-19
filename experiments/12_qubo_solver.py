@@ -324,6 +324,8 @@ def main() -> None:
             "method": "direct_heuristic",
         })
         convergence[f"M{m_sub}_N{n_sub}"]["heuristic"] = cov_h
+        convergence[f"M{m_sub}_N{n_sub}"]["heuristic_seconds"] = h_s
+        convergence[f"M{m_sub}_N{n_sub}"]["heuristic_percent"] = 100.0 * cov_h / opt
 
     # ---- outputs --------------------------------------------------------
     save_csv([{k: v for k, v in r.items()} for r in bench],
@@ -378,16 +380,25 @@ def _figures(gap, convergence, ps) -> None:
     stamp(fig, ps)
     save_figure(fig, "fig25_qubo_gap_decomposition")
 
-    fig2, ax2 = new_figure(figsize=(6.2, 4.2))
-    for name, d in convergence.items():
-        curve = np.array([(c[3], c[2]) for c in d["curve"]], dtype=float)
-        ax2.plot(curve[:, 0], curve[:, 1], "o-", lw=1.3, ms=4, label=name)
-    ax2.axhline(100.0, color="#c53030", lw=1.2, ls="--", label="proven optimum")
+    fig2, ax2 = new_figure(figsize=(7.4, 4.6))
+    colours = ("#2b6cb0", "#dd6b20", "#2f855a")
+    for (name, d), c in zip(convergence.items(), colours):
+        curve = np.array([(x[3], x[2]) for x in d["curve"]], dtype=float)
+        ax2.plot(curve[:, 0], curve[:, 1], "o-", lw=1.4, ms=4.5, color=c,
+                 label=f"{name}  QUBO annealing")
+        ax2.plot(d["heuristic_seconds"], d["heuristic_percent"], "*",
+                 ms=17, color=c, markeredgecolor="black", markeredgewidth=0.6,
+                 label=f"{name}  direct classical")
+    ax2.axhline(100.0, color="#c53030", lw=1.3, ls="--")
+    ax2.text(0.985, 100.4, "proven optimum", transform=ax2.get_yaxis_transform(),
+             ha="right", va="bottom", fontsize=8, color="#c53030")
     ax2.set_xscale("log")
-    ax2.set_xlabel("sampler wall-clock time (s)")
+    ax2.set_xlabel("solver wall-clock time (s)")
     ax2.set_ylabel("% of proven optimum")
-    ax2.set_title("Accuracy bought per second of annealing")
-    ax2.legend(fontsize=7, loc="lower right")
+    ax2.set_title("QUBO annealing versus direct classical search"
+                  "\nupper left is better: more accurate, in less time")
+    ax2.legend(fontsize=7, loc="lower right", ncol=1)
+    ax2.grid(alpha=0.3)
     stamp(fig2, ps)
     save_figure(fig2, "fig26_qubo_solver_convergence")
 

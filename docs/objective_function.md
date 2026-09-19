@@ -456,12 +456,18 @@ meeting:
 
 ## 11. What is deliberately not claimed
 
-- No quantum solver has been run. The classical formulation is validated; the
-  solver comparison has not been done, and a classical baseline (greedy /
-  simulated annealing) must exist before any quantum claim is meaningful.
+- No quantum **hardware** has been run. The QUBO is solved with the classical
+  simulated-annealing sampler in `dwave-samplers`, behind the same `dimod`
+  interface a quantum annealer would use. The comparison it produced is
+  unfavourable to the QUBO route: on real ALMA geometry the formulation gap is
+  zero, but the sampler reaches 86-92 % of the proven optimum where a direct
+  classical heuristic reaches 98 % roughly a hundred times faster. Any quantum
+  claim must beat that, not a straw man.
 - The PWV term is plumbing, not physics, until per-pad data exists.
-- The phase term (4.5) is standard millimetre-wave physics but its constants
-  are unpinned; it is a model, not a site measurement.
+- The phase term (4.5) now uses measured ALMA constants (ALMA Memo 624), not
+  assumed ones, and reproduces that memo's own published scaling factors. What
+  remains unpinned is time: the values are medians over thousands of
+  observations, so they describe the site rather than a given night.
 - Arrays are treated as coplanar (`w = 0`), with no primary beam, no bandwidth
   or time smearing, and no noise model.
 

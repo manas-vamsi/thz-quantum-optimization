@@ -1,11 +1,24 @@
 # Quantum Optimization of Terahertz Interferometric Architectures
 
 Research prototype. Classical foundation first: array layouts → baselines →
-(u,v) → UV-cell occupancy → metrics → PSF → a small, **validated** QUBO.
-No quantum solver is used yet, on purpose.
+(u,v) → UV-cell occupancy → metrics → PSF → a small, **validated** QUBO — which
+is then actually solved and benchmarked against certified optima.
 
-**Status:** preliminary. Everything below is a first milestone, not a result
-ready for publication.
+**Status:** the manuscript in [`paper/`](paper/) is a complete draft. Headline
+findings, including the unflattering one:
+
+- On real ALMA pad geometry the QUBO's **formulation gap is zero** (verified by
+  enumerating every feasible selection of a 16-pad instance), but an annealing
+  sampler reaches only 86–92 % of the proven optimum where a direct classical
+  heuristic reaches 98 % about a hundred times faster. Converting this problem
+  to a QUBO and annealing it is, at these sizes, worse than not converting.
+- Measured ALMA phase statistics show water-vapour-radiometer correction, not
+  geometry, decides whether long baselines are usable at 300 GHz.
+- A UV weighting **derived** from a source model (Fisher information on a disc
+  gap) beats the hand-chosen cell-count metric by 10–16 % on the error bar it
+  delivers, at the cost of up to 45 % of UV coverage.
+
+No quantum *hardware* has been used and no quantum advantage is claimed.
 
 ---
 
@@ -277,7 +290,12 @@ is the structural reason a QUBO solver is worth trying here at all.
 
 ## 11. Current limitations
 
-- No quantum solver. Deliberate: the classical objective is not yet settled.
+- No quantum **hardware**. The QUBO is solved with `dwave-samplers`' classical
+  simulated annealer behind the `dimod` interface a quantum annealer would use;
+  a hardware run would additionally need `dwave-system` and an API token, and
+  would have to beat the classical bar recorded in `experiments/12_qubo_solver.py`.
+- No image is ever reconstructed. UV coverage and the Cramér–Rao bound both
+  *predict* image quality rather than measure it.
 - PWV costs are **synthetic** (`constant`, `altitude`). No measured atmospheric
   data is shipped and none is invented. The term is an interface, not physics.
 - The phase term now has **two** implementations: a graph-connectivity
@@ -332,9 +350,10 @@ python 04_psf_comparison.py
 python 05_small_qubo.py
 ```
 
-Requires Python ≥ 3.10 and numpy / scipy / matplotlib / pandas / pyyaml.
-Optional quantum stack (`dimod`, `dwave-neal`, `qiskit`) is **not** required
-and is not used by any of the above. Random layouts are seeded from
+Requires Python ≥ 3.10 and numpy / scipy / matplotlib / pandas / pyyaml, plus
+`dimod` and `dwave-samplers` for the QUBO solving in `12_qubo_solver.py` and
+`tests/test_qubo_solver.py`. All are in `requirements.txt`; no commercial solver
+and no cloud service is needed. Random layouts are seeded from
 `configs/default.yaml`; every other generator is deterministic.
 
 ## 14. What should be done next

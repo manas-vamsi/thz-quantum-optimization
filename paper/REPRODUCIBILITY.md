@@ -52,7 +52,9 @@ image, so a figure separated from this directory still states what produced it.
 | §3 | Mixed-integer certification and dual bounds | `code/src/thz_opt/optimize/exact.py` |
 | §4.2 | Greedy, one-swap local search, simulated annealing | `code/src/thz_opt/optimize/heuristics.py` |
 | §4.2 | Incremental UV occupancy used by every search | `code/src/thz_opt/optimize/state.py` |
-| §4.3 | Science-case radial weightings | `code/src/thz_opt/optimize/science_cases.py` |
+| §4.2.2 | QUBO solved with an annealing sampler; formulation vs. solver gap | `code/experiments/12_qubo_solver.py` |
+| §4.3 | Science-case radial weightings (chosen by hand) | `code/src/thz_opt/optimize/science_cases.py` |
+| §4.3.1 | Fisher-information UV weight derived from a disc gap model | `code/src/thz_opt/science/disk_gap.py`, `code/experiments/13_science_case.py` |
 | §4.4 | Multi-frequency synthesis, `a_ck = sum_f a_ckf` | `code/src/thz_opt/interferometry/multifrequency.py` |
 | §4.5, Eq. (8) | Multi-epoch selection and movement cost | `code/src/thz_opt/qubo/multiepoch.py` |
 | §5 | Scenario-mean robustness; star cable cost | `code/src/thz_opt/qubo/robust.py`, `constraints/cable.py` |
@@ -66,7 +68,7 @@ cd code
 python -m pytest
 ```
 
-144 checks. The ones that matter most for the manuscript's claims:
+175 checks. The ones that matter most for the manuscript's claims:
 
 | Check | What it establishes |
 |---|---|
@@ -79,6 +81,11 @@ python -m pytest
 | Earth rotation reduces to the zenith snapshot | the UV convention is correct |
 | Dense and sparse QUBO assemblies agree | the large-instance path is the same model |
 | Star cable cost never undercuts the minimum spanning tree | the linear cost term is an upper bound |
+| `dimod` energies match our upper-triangular convention | solver results mean what the formulation says |
+| Every annealing sample is feasible at the derived penalty floors | the penalty bounds hold against a real solver |
+| Below the Rosenberg floor, feasibility actually breaks | the previous check is informative, not vacuous |
+| Numerical Hankel transform against the analytic uniform disc | the science-derived weight rests on a correct transform |
+| Flux-conserving gap derivative integrates to zero | the weight measures shape, not total brightness |
 
 ## Reproducing everything from scratch
 

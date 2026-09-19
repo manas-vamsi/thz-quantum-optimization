@@ -337,11 +337,18 @@ rest of this section to mean anything.
 The **solver gap** is what the sampler leaves on the table. Measured against the
 MILP certificates on the same real geometry:
 
-| Instance | QUBO variables | Couplings | Proven optimum | Annealing, 500 reads | Direct classical heuristic |
-|---|---:|---:|---:|---:|---:|
-| M=16, N=6 | 136 | 1 506 | 87 | 79 (90.8%), 3.4 s | 85 (97.7%), 0.15 s |
-| M=24, N=8 | 300 | 5 182 | 162 | 149 (92.0%), 10.3 s | 160 (98.8%), 0.19 s |
-| M=40, N=10 | 820 | 33 689 | 198 | 170 (85.9%), 35.3 s | 194 (98.0%), 0.35 s |
+| Instance | QUBO variables | Couplings | Proven optimum | Annealing, 500 reads | Direct classical heuristic | Speed ratio |
+|---|---:|---:|---:|---:|---:|---:|
+| M=16, N=6 | 136 | 1 506 | 87 | 79 (90.8%) | 85 (97.7%) | 35x |
+| M=24, N=8 | 300 | 5 182 | 162 | 149 (92.0%) | 160 (98.8%) | 63x |
+| M=40, N=10 | 820 | 33 689 | 198 | 170 (85.9%) | 194 (98.0%) | 72x |
+
+Cell counts are deterministic at a fixed seed and reproduce exactly. Absolute
+wall-clock times are not quoted in the table because they vary by a factor of
+several with machine load; the ratio between the two solvers on the same run is
+the stable quantity, and it is reported instead. In the run archived in
+`data/results/exp12_solver_benchmark.csv` the classical heuristic took 0.14 s to
+1.37 s and annealing took 8.8 s to 98 s.
 
 Three results follow, and the third is the one that matters.
 
@@ -359,9 +366,11 @@ M=40, while the time to reach it grows by an order of magnitude.
 Third, and decisively: **the direct classical heuristic beats the QUBO route on
 every instance, by a wide margin, in roughly one hundredth of the time.**
 Greedy-plus-swap operating directly on unique-cell coverage reaches 98% of the
-proven optimum in under 0.4 s, where annealing on the QUBO reaches 86-92% in
-3-35 s. On this problem, at these sizes, converting to a QUBO and annealing it
-is strictly worse than not converting at all.
+proven optimum, where annealing on the QUBO reaches 86-92%, and it does so
+between 35 and 72 times faster on the same hardware in the same run. On this
+problem, at these sizes, converting to a QUBO and annealing it is strictly worse
+than not converting at all -- and the disadvantage grows with instance size on
+both axes.
 
 This is a negative result about the route, not about the formulation, and it is
 reported because it sets the bar that quantum hardware would have to clear.
@@ -374,7 +383,9 @@ would multiply the physical qubit count by a further large factor. Any claim
 that quantum annealing helps here must therefore beat a 0.35-second classical
 heuristic that is already within 2% of proven optimal.
 
-![Figure 4. Formulation gap and solver gap, separated.](figures/fig25_qubo_gap_decomposition.png)
+![Figure 4. Formulation gap and solver gap, separated. Left: every feasible selection of a 16-pad real instance, plotted as QUBO score against true coverage; the QUBO's own optimum coincides with the true optimum, so the formulation gap is zero. Right: annealing accuracy against the certified optimum as a function of sampling effort.](figures/fig25_qubo_gap_decomposition.png)
+
+![Figure 5. QUBO annealing against direct classical search on the same three real-geometry instances, as accuracy versus wall-clock time. Stars mark the classical heuristic. It sits above and to the left of every annealing point on every instance: more accurate, in roughly one hundredth of the time.](figures/fig26_qubo_solver_convergence.png)
 
 ### 4.3 Science-case dependence
 
@@ -389,7 +400,7 @@ case.
 | Compact source | 706 | 633.38 | 0.0512 | 0.104 |
 | Extended emission | 505 | 1024.00 | 0.0598 | 0.165 |
 
-![Figure 5. Different science-case weights select different pad subsets.](figures/fig19_science_case_layouts.png)
+![Figure 6. Different science-case weights select different pad subsets.](figures/fig19_science_case_layouts.png)
 
 A negative result qualifies this and is worth stating, because it determines how
 a science case must be specified to have any effect. Expressing the case as a
@@ -502,7 +513,7 @@ baseline-activation variables, the Fisher objective needs no Rosenberg
 quadratization at all and is already a plain QUBO over the pad variables, unlike
 unique-cell coverage.
 
-![Figure 6. The source model, the derived UV weight, and its effect on the achievable error bar.](figures/fig27_science_weight_derivation.png)
+![Figure 7. The source model, the derived UV weight, and its effect on the achievable error bar.](figures/fig27_science_weight_derivation.png)
 
 ### 4.4 Multi-frequency synthesis
 
@@ -518,7 +529,7 @@ non-monotonic; coverage alone remains insufficient as an imaging criterion.
 | 20% | 5 | 447 | 0.130 |
 | 30% | 7 | 487 | 0.137 |
 
-![Figure 7. Multi-frequency UV filling.](figures/fig21_multifrequency_gain.png)
+![Figure 8. Multi-frequency UV filling.](figures/fig21_multifrequency_gain.png)
 
 ### 4.5 Multi-epoch reconfiguration
 
@@ -567,7 +578,7 @@ emitting the same model as a coefficient dictionary stores 6.2 million non-zero
 terms instead, which is also the input form expected by standard QUBO solver
 interfaces.
 
-![Figure 8. Multi-epoch coverage versus reconfiguration cost.](figures/fig22_multiepoch_tradeoff.png)
+![Figure 9. Multi-epoch coverage versus reconfiguration cost.](figures/fig22_multiepoch_tradeoff.png)
 
 ### 4.6 Analytic layout families as references
 
@@ -677,9 +688,9 @@ opacity context: medians of 3.05 mm in January, 0.88 mm in June, 0.70 mm in
 August and 1.64 mm in December [18], against a twenty-year year-round median
 near 1 mm [19].
 
-![Figure 9. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
+![Figure 10. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
 
-![Figure 10. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
+![Figure 11. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
 
 ## 5. Discussion
 

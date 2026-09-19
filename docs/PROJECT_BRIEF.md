@@ -7,7 +7,9 @@ once and give useful technical advice. Weak points are stated rather than
 hidden — the point is to get them attacked.
 
 Repository: `manas-vamsi/thz-quantum-optimization` (private).
-111 automated tests, all passing. No quantum solver has been run yet.
+175 automated tests, all passing. The QUBO is now solved with an annealing
+sampler (`dwave-samplers`, classical) and benchmarked against MILP-certified
+optima; no quantum hardware has been used.
 
 ---
 

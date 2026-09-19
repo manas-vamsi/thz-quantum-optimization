@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `50dbbb7` on 2026-09-19.
+Synchronised from the project repository at commit `b469bd4` on 2026-09-19.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -22,7 +22,7 @@ python paper/sync_code.py --check
 | `code/experiments/09_science_cases.py` | `bdc94b559264c9d5` | 17146 |
 | `code/experiments/10_multiepoch.py` | `2cdd755021f7cdcb` | 14170 |
 | `code/experiments/11_real_alma.py` | `beeaff0623433a10` | 17288 |
-| `code/experiments/12_qubo_solver.py` | `9818b5fa17a03b36` | 17128 |
+| `code/experiments/12_qubo_solver.py` | `23bddcc64eb286ce` | 17844 |
 | `code/experiments/13_science_case.py` | `5ed874608c79f313` | 14100 |
 | `code/experiments/common.py` | `6074ef5db54ecc6e` | 6643 |
 | `code/pytest.ini` | `3b3ffd97382ae1ec` | 61 |
@@ -101,8 +101,8 @@ python paper/sync_code.py --check
 | `data/exp11_real_alma.csv` | `8bf092e2b7b07bcf` | 1243 |
 | `data/exp11_summary.json` | `cb8e11ad44bf5edc` | 10207 |
 | `data/exp12_gap_decomposition.csv` | `713c6a315e6abf1f` | 23258 |
-| `data/exp12_solver_benchmark.csv` | `fece89c19bb31ef1` | 1679 |
-| `data/exp12_summary.json` | `e607feea28fcc2e1` | 7935 |
+| `data/exp12_solver_benchmark.csv` | `4c75c30e79357277` | 1678 |
+| `data/exp12_summary.json` | `603602269fa95ca8` | 7934 |
 | `data/exp13_science_case.csv` | `00bf6682fe4e578c` | 980 |
 | `data/exp13_summary.json` | `f9b2f8560c24b785` | 4443 |
 | `figures/fig16_formulation_comparison.png` | `a96072f98354724f` | 120249 |
@@ -114,7 +114,7 @@ python paper/sync_code.py --check
 | `figures/fig23_real_alma_pads.png` | `b01dbbb8211caa05` | 67423 |
 | `figures/fig24_real_alma_selection.png` | `f3d5f80cffc00acc` | 65613 |
 | `figures/fig25_qubo_gap_decomposition.png` | `f8bf750d74b7f13e` | 130000 |
-| `figures/fig26_qubo_solver_convergence.png` | `62ee2c70d58a0cda` | 57728 |
+| `figures/fig26_qubo_solver_convergence.png` | `9432aed491bbfe92` | 93752 |
 | `figures/fig27_science_weight_derivation.png` | `7041e2d9ed199705` | 146103 |
 | `figures/fig28_science_vs_cellcount.png` | `dc3683ea6c406de8` | 70796 |
 
