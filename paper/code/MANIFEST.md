@@ -1,6 +1,6 @@
 # Code manifest
 
-Synchronised from the project repository at commit `9e10789` on 2026-09-19.
+Synchronised from the project repository at commit `50dbbb7` on 2026-09-19.
 
 Each entry is the SHA-256 prefix of the file as shipped. Regenerate and re-verify with:
 
@@ -22,9 +22,11 @@ python paper/sync_code.py --check
 | `code/experiments/09_science_cases.py` | `bdc94b559264c9d5` | 17146 |
 | `code/experiments/10_multiepoch.py` | `2cdd755021f7cdcb` | 14170 |
 | `code/experiments/11_real_alma.py` | `beeaff0623433a10` | 17288 |
+| `code/experiments/12_qubo_solver.py` | `9818b5fa17a03b36` | 17128 |
+| `code/experiments/13_science_case.py` | `5ed874608c79f313` | 14100 |
 | `code/experiments/common.py` | `6074ef5db54ecc6e` | 6643 |
 | `code/pytest.ini` | `3b3ffd97382ae1ec` | 61 |
-| `code/requirements.txt` | `49a9690806e2926f` | 364 |
+| `code/requirements.txt` | `a36ae851cbdc6027` | 665 |
 | `code/src/thz_opt/__init__.py` | `6af959cffcfd100f` | 987 |
 | `code/src/thz_opt/arrays/__init__.py` | `e3b0c44298fc1c14` | 0 |
 | `code/src/thz_opt/arrays/fibonacci.py` | `766b1655ec8eff4a` | 4988 |
@@ -68,6 +70,8 @@ python paper/sync_code.py --check
 | `code/src/thz_opt/qubo/objective.py` | `32dc41314b196a0a` | 12472 |
 | `code/src/thz_opt/qubo/robust.py` | `fd4e85ad24ad4919` | 3403 |
 | `code/src/thz_opt/qubo/validation.py` | `0342605d7e1fc721` | 5235 |
+| `code/src/thz_opt/science/__init__.py` | `1da8feb5cff81a92` | 58 |
+| `code/src/thz_opt/science/disk_gap.py` | `f86b60b0c14b3937` | 15902 |
 | `code/tests/test_arrays.py` | `4140cb46ac58e48b` | 3659 |
 | `code/tests/test_baseline_qubo.py` | `991c8853c68316d0` | 9226 |
 | `code/tests/test_baselines.py` | `ed6032641f46f51b` | 2116 |
@@ -77,8 +81,10 @@ python paper/sync_code.py --check
 | `code/tests/test_metrics.py` | `18035b79405c7a68` | 6679 |
 | `code/tests/test_optimize.py` | `019c131fe3eb422a` | 2528 |
 | `code/tests/test_qubo.py` | `a947af5ae1b34591` | 6969 |
+| `code/tests/test_qubo_solver.py` | `ae07699c14045141` | 5291 |
 | `code/tests/test_real_arrays.py` | `007aef074c486fb6` | 3845 |
 | `code/tests/test_robust_cable_sparse.py` | `4a8378fd0f020f4d` | 6094 |
+| `code/tests/test_science.py` | `66f96805fa227621` | 4980 |
 | `code/tests/test_uv.py` | `00bcb1a5f65b6987` | 5035 |
 | `data/exp06_shootout.csv` | `7b7a2b3cf1815451` | 3579 |
 | `data/exp07_formulations.csv` | `139af6d1b1a656aa` | 1278 |
@@ -92,8 +98,13 @@ python paper/sync_code.py --check
 | `data/exp10_multiepoch.csv` | `aca128e93630ac47` | 471 |
 | `data/exp10_summary.json` | `e67293c4f4ac329e` | 2944 |
 | `data/exp10_window_sweep.csv` | `2e160e493d8531fd` | 280 |
-| `data/exp11_real_alma.csv` | `6c07f695787a5eb2` | 1244 |
-| `data/exp11_summary.json` | `990a31683a9d9953` | 10208 |
+| `data/exp11_real_alma.csv` | `8bf092e2b7b07bcf` | 1243 |
+| `data/exp11_summary.json` | `cb8e11ad44bf5edc` | 10207 |
+| `data/exp12_gap_decomposition.csv` | `713c6a315e6abf1f` | 23258 |
+| `data/exp12_solver_benchmark.csv` | `fece89c19bb31ef1` | 1679 |
+| `data/exp12_summary.json` | `e607feea28fcc2e1` | 7935 |
+| `data/exp13_science_case.csv` | `00bf6682fe4e578c` | 980 |
+| `data/exp13_summary.json` | `f9b2f8560c24b785` | 4443 |
 | `figures/fig16_formulation_comparison.png` | `a96072f98354724f` | 120249 |
 | `figures/fig17_optimizer_comparison.png` | `43ae55addb5d1c09` | 102214 |
 | `figures/fig18_optimized_layout.png` | `027c2465288440cc` | 94933 |
@@ -102,5 +113,9 @@ python paper/sync_code.py --check
 | `figures/fig22_multiepoch_tradeoff.png` | `7ae287e4888cdfb2` | 111684 |
 | `figures/fig23_real_alma_pads.png` | `b01dbbb8211caa05` | 67423 |
 | `figures/fig24_real_alma_selection.png` | `f3d5f80cffc00acc` | 65613 |
+| `figures/fig25_qubo_gap_decomposition.png` | `f8bf750d74b7f13e` | 130000 |
+| `figures/fig26_qubo_solver_convergence.png` | `62ee2c70d58a0cda` | 57728 |
+| `figures/fig27_science_weight_derivation.png` | `7041e2d9ed199705` | 146103 |
+| `figures/fig28_science_vs_cellcount.png` | `dc3683ea6c406de8` | 70796 |
 
-92 files.
+107 files.

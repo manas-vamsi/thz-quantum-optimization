@@ -40,6 +40,8 @@ EXPERIMENTS = [
     "09_science_cases.py",
     "10_multiepoch.py",
     "11_real_alma.py",
+    "12_qubo_solver.py",
+    "13_science_case.py",
 ]
 
 FIGURES = [
@@ -51,6 +53,10 @@ FIGURES = [
     "fig22_multiepoch_tradeoff.png",
     "fig23_real_alma_pads.png",
     "fig24_real_alma_selection.png",
+    "fig25_qubo_gap_decomposition.png",
+    "fig26_qubo_solver_convergence.png",
+    "fig27_science_weight_derivation.png",
+    "fig28_science_vs_cellcount.png",
 ]
 
 DATA = [
@@ -68,6 +74,11 @@ DATA = [
     "exp10_summary.json",
     "exp11_real_alma.csv",
     "exp11_summary.json",
+    "exp12_gap_decomposition.csv",
+    "exp12_solver_benchmark.csv",
+    "exp12_summary.json",
+    "exp13_science_case.csv",
+    "exp13_summary.json",
 ]
 
 PYTEST_INI = """[pytest]

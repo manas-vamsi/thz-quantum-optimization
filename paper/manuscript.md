@@ -1,4 +1,4 @@
-# Atmosphere-Aware QUBO Formulations for Discrete-Pad Terahertz Interferometric Array Design
+# QUBO Formulations for Discrete-Pad Terahertz Array Design: Certified Optima, Solver Gaps, and a Science-Derived Objective
 
 **Manasa Vamsi**
 
@@ -6,9 +6,9 @@
 > email, ISRO Space Applications Centre coauthor information, funding statement,
 > acknowledgements, and repository DOI. Section 4.7 uses the published ALMA pad
 > coordinates together with measured phase-stability and water-vapour statistics
-> for that site; the controlled studies in Sections 4.1 to 4.6 use synthetic
-> candidate pads. This is a methods study, not a site-specific build
-> recommendation.
+> for that site, and Sections 4.2.2 and 4.3.1 use the same real pad list; the
+> controlled studies in Sections 4.1, 4.3 and 4.4 to 4.6 use synthetic candidate
+> pads. This is a methods study, not a site-specific build recommendation.
 
 ## Abstract
 
@@ -40,9 +40,19 @@ feasible selection, and optimality is proven for instances up to 40 candidate
 pads on that real geometry. Using measured phase-stability statistics for the
 same site, water-vapour-radiometer correction separates an array in which 98% of
 baselines fall below half coherence at 300 GHz from one in which none does.
+Solving the QUBO with an annealing sampler returns feasible solutions at every
+instance size, and exhaustive enumeration shows the Bonferroni surrogate selects
+the exact coverage optimum, so the formulation gap is zero; the sampler
+nevertheless reaches only 86% to 92% of the proven optimum, where a direct
+classical heuristic reaches 98% about a hundred times faster. Finally, replacing
+the cell-count metric with a Fisher-information weight derived from a
+protoplanetary-disc gap model tightens the Cramer-Rao bound on the measured
+parameter by 10% to 16%, and quantifies the resulting redundancy-versus-imaging
+trade-off. No quantum hardware was used and no quantum advantage is claimed.
 
 **Index Terms:** terahertz interferometry; aperture synthesis; UV coverage;
-QUBO; quadratic optimization; quantum annealing; array configuration.
+QUBO; quadratic optimization; quantum annealing; simulated annealing; Fisher
+information; array configuration.
 
 ## 1. Introduction
 
@@ -298,6 +308,74 @@ larger instances it is the dual bound.
 
 ![Figure 3. An optimized discrete-pad layout and its UV response.](figures/fig18_optimized_layout.png)
 
+#### 4.2.2 Solving the QUBO, and separating the two gaps
+
+Formulating a QUBO and solving one are different claims, and a study that only
+does the first cannot say whether the route works. The QUBO of Section 2.4 was
+therefore handed to an annealing sampler (`dwave-samplers`, the software
+interface used to drive D-Wave hardware; no quantum hardware was used and no
+quantum advantage is claimed). Two distinct gaps separate the result from the
+truth, and conflating them is the standard way such a study misleads.
+
+The **formulation gap** is the loss from optimizing the second-order Bonferroni
+bound instead of coverage itself; no solver can close it. On a 16-pad instance
+of real ALMA geometry every feasible selection was enumerated, so both optima
+are known exactly:
+
+| Quantity | Value |
+|---|---:|
+| Feasible selections enumerated | 2 324 |
+| True coverage optimum | 87 cells |
+| Coverage at the QUBO's own optimum | 87 cells |
+| **Formulation gap** | **0 cells (0.0%)** |
+| Correlation, QUBO score vs. true coverage | 0.929 |
+
+The Bonferroni surrogate selects the exact coverage optimum. The formulation is
+therefore not the limiting factor, which is the necessary precondition for the
+rest of this section to mean anything.
+
+The **solver gap** is what the sampler leaves on the table. Measured against the
+MILP certificates on the same real geometry:
+
+| Instance | QUBO variables | Couplings | Proven optimum | Annealing, 500 reads | Direct classical heuristic |
+|---|---:|---:|---:|---:|---:|
+| M=16, N=6 | 136 | 1 506 | 87 | 79 (90.8%), 3.4 s | 85 (97.7%), 0.15 s |
+| M=24, N=8 | 300 | 5 182 | 162 | 149 (92.0%), 10.3 s | 160 (98.8%), 0.19 s |
+| M=40, N=10 | 820 | 33 689 | 198 | 170 (85.9%), 35.3 s | 194 (98.0%), 0.35 s |
+
+Three results follow, and the third is the one that matters.
+
+First, **every returned sample was feasible** -- correct cardinality and no
+violated Rosenberg relation -- at every instance size and every number of
+reads. The penalty floors of Section 2.4 are derived bounds, and this is the
+empirical confirmation that a sampler cannot find a cheaper infeasible state.
+The accompanying test suite also verifies the converse, that lowering the
+Rosenberg weight below its floor does break feasibility, so the check is
+informative rather than vacuous.
+
+Second, the solver gap **widens with instance size**, from 9% at M=16 to 14% at
+M=40, while the time to reach it grows by an order of magnitude.
+
+Third, and decisively: **the direct classical heuristic beats the QUBO route on
+every instance, by a wide margin, in roughly one hundredth of the time.**
+Greedy-plus-swap operating directly on unique-cell coverage reaches 98% of the
+proven optimum in under 0.4 s, where annealing on the QUBO reaches 86-92% in
+3-35 s. On this problem, at these sizes, converting to a QUBO and annealing it
+is strictly worse than not converting at all.
+
+This is a negative result about the route, not about the formulation, and it is
+reported because it sets the bar that quantum hardware would have to clear.
+That bar is demanding. The cost of the baseline-variable construction is
+M + M(M-1)/2 variables: a 40-pad instance already needs 820 variables and
+33 689 couplings, and a 174-pad instance -- the full ALMA pad list -- would need
+15 225 variables. Since the coupling graph is dense and current annealing
+hardware offers sparse fixed connectivity, minor-embedding such an instance
+would multiply the physical qubit count by a further large factor. Any claim
+that quantum annealing helps here must therefore beat a 0.35-second classical
+heuristic that is already within 2% of proven optimal.
+
+![Figure 4. Formulation gap and solver gap, separated.](figures/fig25_qubo_gap_decomposition.png)
+
 ### 4.3 Science-case dependence
 
 In a controlled 15-of-60-pad study, compact-source weighting selected a layout
@@ -311,7 +389,7 @@ case.
 | Compact source | 706 | 633.38 | 0.0512 | 0.104 |
 | Extended emission | 505 | 1024.00 | 0.0598 | 0.165 |
 
-![Figure 4. Different science-case weights select different pad subsets.](figures/fig19_science_case_layouts.png)
+![Figure 5. Different science-case weights select different pad subsets.](figures/fig19_science_case_layouts.png)
 
 A negative result qualifies this and is worth stating, because it determines how
 a science case must be specified to have any effect. Expressing the case as a
@@ -332,6 +410,100 @@ A science case stated as a mild preference is, for design purposes, not a
 science case. The band-limited weights used above are what produce the
 four-pad overlap.
 
+#### 4.3.1 A weighting derived rather than chosen
+
+Everything above shares a weakness: the weights were selected by hand, and
+optimizing a figure of merit one invents oneself is circular. This subsection
+removes the choice by deriving the weight from a measurement.
+
+Take a source model I(r; theta) depending on a parameter theta to be estimated.
+With independent Gaussian noise of variance sigma^2 per visibility, the Fisher
+information carried by a set S of sampled spatial frequencies is
+
+    F(theta) = (1/sigma^2) * sum_{(u,v) in S} |dV(u,v)/dtheta|^2,
+
+and the Cramér-Rao bound gives sigma(theta) >= 1/sqrt(F) [21]. This is already a
+sum over sampled cells of a per-cell weight, so the weight
+
+    w(u,v) = |dV(u,v)/dtheta|^2
+
+drops into the existing optimizer with nothing left to tune, and two arrays
+become comparable in the unit of the quantity being measured rather than in
+cells.
+
+The source is HL Tau as characterized by the ALMA long-baseline campaign [20]:
+140 pc, dust continuum to about 120 au, dark rings at 13.2, 32.3 and 64.2 au.
+The model is an axisymmetric truncated power law with a Gaussian annular
+depression at 32.3 au, so V(q) is the order-zero Hankel transform of the radial
+profile; the numerical transform is verified against the analytic uniform-disc
+form to a relative 1e-6.
+
+**Flux conservation is not optional here.** Taken literally, deepening a gap
+removes flux, and nothing measures total flux better than a zero-spacing
+sample; the resulting weight peaks at the shortest available baseline. That is a
+correct answer to a badly posed question, and it is degenerate with the overall
+brightness scale, which single-dish photometry supplies independently. The model
+therefore renormalizes as the gap deepens, so the perturbation integrates to
+zero over the sky and dV/dtheta vanishes at q=0 by construction. The
+unconstrained form is retained in the code for comparison, and the two differ by
+more than two orders of magnitude in peak spatial frequency.
+
+The derived weight is then not one weight but three, because the gap's depth,
+radius and width are informed by different spatial frequencies:
+
+| Parameter estimated | Peak baseline | Half-maximum band |
+|---|---:|---:|
+| Gap depth | 166 m | 105 - 229 m |
+| Gap radius | 783 m | 277 - 1283 m |
+| Gap width | 165 m | 104 - 227 m |
+
+"Optimize the array for HL Tau" is therefore not yet an instruction. Locating
+the gap demands baselines roughly five times longer than measuring how deep it
+is. Both are well below the 2723 m needed to *resolve* the gap at 1 mm, which is
+the expected distinction between fitting a known model and imaging an unknown
+one.
+
+Optimizing 20 of 80 real ALMA pads under each objective, and scoring every
+result by the Cramér-Rao bound:
+
+| Objective | Unique cells | Samples per occupied cell | sigma(depth) | sigma(radius) | sigma(width) |
+|---|---:|---:|---:|---:|---:|
+| Maximum unique cells | 1330 | 11.7 | 3.487e10 | 1.837e12 | 3.255e11 |
+| Fisher information, depth | 756 | 20.6 | **3.124e10** | 3.530e12 | 2.905e11 |
+| Fisher information, radius | 1206 | 12.9 | 4.238e10 | **1.543e12** | 3.969e11 |
+| Fisher information, width | 734 | 21.2 | 3.118e10 | 3.389e12 | **2.900e11** |
+
+The derived objective improves the error bar on its own parameter by 10.4% to
+16.0% over the cell-count array, so the hand-chosen metric was measurably
+leaving accuracy on the table. What it costs is the more interesting half:
+
+| Parameter | Error-bar gain | Unique cells lost | Redundancy |
+|---|---:|---:|---:|
+| Depth | 10.4% | 43.2% | 11.7 -> 20.6 |
+| Radius | 16.0% | 9.3% | 11.7 -> 12.9 |
+| Width | 10.9% | 44.8% | 11.7 -> 21.2 |
+
+Because the Fisher information sums over *samples* and not over distinct cells,
+a repeated visibility is a genuine second measurement, and the optimizer buys
+accuracy by piling baselines into the informative band. For depth and width that
+nearly doubles the redundancy and discards 44% of the UV coverage: the resulting
+array measures that one number well and images poorly. For the gap radius the
+same procedure costs only 9.3% of cells, because locating a ring genuinely
+requires long baselines and that demand is aligned with imaging rather than
+opposed to it.
+
+This makes concrete a tension usually discussed qualitatively. An array
+optimized to estimate a parameter of a known model tends toward redundancy; an
+array optimized to image an unknown sky tends toward diversity. Which is wanted
+is a science decision, not a mathematical one -- but once it is made, the
+weighting follows with nothing left to choose, and that is the contribution
+here. One structural bonus: since F(x) = sum_{i<j} W_ij x_i x_j is linear in the
+baseline-activation variables, the Fisher objective needs no Rosenberg
+quadratization at all and is already a plain QUBO over the pad variables, unlike
+unique-cell coverage.
+
+![Figure 6. The source model, the derived UV weight, and its effect on the achievable error bar.](figures/fig27_science_weight_derivation.png)
+
 ### 4.4 Multi-frequency synthesis
 
 Multi-frequency synthesis increased occupied cells from 340 at zero bandwidth
@@ -346,7 +518,7 @@ non-monotonic; coverage alone remains insufficient as an imaging criterion.
 | 20% | 5 | 447 | 0.130 |
 | 30% | 7 | 487 | 0.137 |
 
-![Figure 5. Multi-frequency UV filling.](figures/fig21_multifrequency_gain.png)
+![Figure 7. Multi-frequency UV filling.](figures/fig21_multifrequency_gain.png)
 
 ### 4.5 Multi-epoch reconfiguration
 
@@ -395,7 +567,7 @@ emitting the same model as a coefficient dictionary stores 6.2 million non-zero
 terms instead, which is also the input form expected by standard QUBO solver
 interfaces.
 
-![Figure 6. Multi-epoch coverage versus reconfiguration cost.](figures/fig22_multiepoch_tradeoff.png)
+![Figure 8. Multi-epoch coverage versus reconfiguration cost.](figures/fig22_multiepoch_tradeoff.png)
 
 ### 4.6 Analytic layout families as references
 
@@ -505,9 +677,9 @@ opacity context: medians of 3.05 mm in January, 0.88 mm in June, 0.70 mm in
 August and 1.64 mm in December [18], against a twenty-year year-round median
 near 1 mm [19].
 
-![Figure 7. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
+![Figure 9. The 174 published ALMA twelve-metre pads, and the inner 500 m of the field.](figures/fig23_real_alma_pads.png)
 
-![Figure 8. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
+![Figure 10. A searched selection of 20 real pads and its UV coverage.](figures/fig24_real_alma_selection.png)
 
 ## 5. Discussion
 
@@ -516,12 +688,24 @@ O(M^2) variables for faithful quadratic representation of pairwise baseline
 physics. The overlap graph can be sparse, but the fixed-cardinality constraint
 is dense, making direct QPU embedding difficult at large M.
 
-This study does not claim quantum advantage. Its contribution is the validated
-problem and the classical baseline needed for a fair future comparison. Such a
-comparison must use matched coefficients, feasibility criteria, solution-quality
-targets, restarts, and wall-clock budgets. It should compare QUBO-compatible
-solvers against greedy, local search, simulated annealing, and certified or
-bounded MILP results at small sizes.
+This study does not claim quantum advantage, and Section 4.2.2 is the reason to
+be explicit about why. The QUBO was solved, not merely written down, and the
+outcome was negative for the QUBO route: the formulation gap is zero, every
+sample was feasible, and the sampler still lost to a direct classical heuristic
+that was both more accurate (98% versus 86-92% of proven optimal) and about a
+hundred times faster. A fair future comparison against quantum hardware must
+therefore clear that specific bar, not an unoptimized straw man, and must
+account for the embedding cost of a dense coupling graph that already reaches
+33 689 couplings at M=40 and would reach roughly 15 000 variables at the full
+174-pad ALMA field.
+
+There is a structural lesson in where the QUBO route is *not* penalized. The
+Fisher objective of Section 4.3.1 is linear in the baseline-activation variables
+and so requires no Rosenberg quadratization, no auxiliary variables and no
+penalty tuning at all: it is a plain quadratic form over the pad variables.
+Objectives defined by what the array measures are cheaper to encode than
+objectives defined by how many cells it touches, which is an argument for the
+science-derived formulation independent of its accuracy.
 
 Two further terms are quadratic and are implemented, with their limits stated.
 Expected performance over a finite set of atmospheric or scheduling scenarios is
@@ -542,25 +726,50 @@ atmosphere there are both real. The controlled studies of Sections 4.1 to 4.6
 still use synthetic pad fields, by design, so that N, extent and UV grid can be
 held fixed across comparisons.
 
+Section 4.3.1 closes the objective-function gap: the UV weighting there is
+derived from a source model and an estimator bound rather than chosen, and
+arrays are compared by the error bar they deliver on a physical quantity. Its
+own assumptions are stated in place -- independent identically distributed
+visibility noise, so per-baseline sensitivity and atmospheric correlation are
+omitted from the Fisher sum, and an axisymmetric face-on disc, which makes the
+weight a function of baseline length alone rather than a two-dimensional
+correlated one.
+
 What remains assumed is temporal rather than physical: the phase constants are
 medians over thousands of observations at a 120 s timescale, so they describe the
 site rather than a particular night, and the source memo notes that its sample
 omits the very worst conditions, in which no observation was attempted. The
 model is coplanar, with no w term, primary beam, noise, time or bandwidth
-smearing, polarization, mosaicking, or end-to-end reconstruction. The remaining
-scientific gap is a defined science case from which the UV weighting is derived
-rather than chosen.
+smearing, polarization, mosaicking, or end-to-end reconstruction. No image is
+reconstructed anywhere in this work: UV coverage and the Cramér-Rao bound are
+both predictors of image quality, not measurements of it, and an end-to-end
+imaging study remains the natural next validation.
 
 ## 6. Conclusion
 
 This work provides a QUBO-compatible framework for discrete-pad THz
-interferometer design. Explicit baseline variables resolve the quartic
-UV-overlap obstruction and support exact quadratic sampling-density, repulsion,
-and target-density objectives. The Bonferroni construction adds a sparse
-coverage bound. Controlled experiments show classical UV-occupancy gains,
-science-case dependence, multi-frequency filling, and a multi-epoch
-reconfiguration trade-off. The next step is a real-pad, real-atmosphere study
-with classical certification and quantum-compatible solver benchmarks.
+interferometer design, and then tests it rather than resting on it. Explicit
+baseline variables resolve the quartic UV-overlap obstruction and support exact
+quadratic sampling-density, repulsion and target-density objectives; the
+Bonferroni construction adds a sparse coverage bound whose measured formulation
+gap on real geometry is zero.
+
+Three results are worth separating from the framework. First, on real ALMA pads
+with measured atmospheric constants, water-vapour-radiometer correction rather
+than array geometry is what decides whether long baselines are usable at
+300 GHz. Second, solving the QUBO with an annealing sampler produced feasible
+solutions at every size but lost decisively to a direct classical heuristic in
+both accuracy and time, which sets the bar any quantum result must clear and
+quantifies the embedding cost that stands in the way. Third, replacing the
+invented cell-count metric with a Fisher-information weight derived from a
+source model improves the achievable error bar by 10% to 16%, and shows that
+optimizing for parameter estimation drives an array toward redundancy while
+optimizing for imaging drives it toward diversity -- a trade-off that a
+cell-count objective cannot express at all.
+
+The natural next steps are an end-to-end imaging validation, per-baseline noise
+and atmospheric correlation in the Fisher sum, and a hardware annealing run
+measured against the classical bar established here.
 
 ## Reproducibility
 
@@ -572,6 +781,9 @@ The associated repository contains all code and outputs. Key scripts are:
 - experiments/08_optimizer_benchmark.py
 - experiments/09_science_cases.py
 - experiments/10_multiepoch.py
+- experiments/11_real_alma.py
+- experiments/12_qubo_solver.py
+- experiments/13_science_case.py
 
 Run the suite with:
 
@@ -637,10 +849,13 @@ checksum for every distributed file.
 
 Python 3.10 or later with the scientific stack: NumPy, SciPy, Matplotlib,
 pandas, PyYAML, and pytest. Mixed-integer certification uses the HiGHS solver
-through `scipy.optimize.milp`; document rendering uses ReportLab. All are open
-source and installable with `pip install -r code/requirements.txt`. No
-commercial solver, and no quantum hardware or cloud service, is required to
-reproduce any result in this manuscript.
+through `scipy.optimize.milp`; QUBO construction and sampling use `dimod` and
+`dwave-samplers`; document rendering uses ReportLab. All are open source and
+installable with `pip install -r code/requirements.txt`. No commercial solver,
+and no quantum hardware or cloud service, is required to reproduce any result in
+this manuscript; the annealing results of Section 4.2.2 use the classical
+simulated-annealing sampler that ships with `dwave-samplers`, behind the same
+`dimod` interface a quantum annealer would be driven through.
 
 | Package | Role | Reference |
 |---|---|---|
@@ -648,6 +863,8 @@ reproduce any result in this manuscript.
 | SciPy | optimization, sparse graphs, HiGHS interface | <https://doi.org/10.1038/s41592-019-0686-2> |
 | Matplotlib | figures | <https://doi.org/10.1109/MCSE.2007.55> |
 | HiGHS | mixed-integer programming | <https://doi.org/10.1007/s12532-017-0130-5> |
+| dimod | QUBO/BQM construction | <https://github.com/dwavesystems/dimod> |
+| dwave-samplers | simulated-annealing sampler | <https://github.com/dwavesystems/dwave-samplers> |
 
 ## References
 
@@ -731,4 +948,11 @@ phase RMS database," ALMA Memo 624, 2023, arXiv:2304.08318.
 [19] F. Cortés et al., "Twenty years of precipitable water vapor measurements in
 the Chajnantor area," *Astronomy and Astrophysics*, vol. 640, A126, 2020,
 doi: 10.1051/0004-6361/202037784.
+
+[20] ALMA Partnership, "The 2014 ALMA long baseline campaign: first results from
+high angular resolution observations toward the HL Tau region," *Astrophysical
+Journal Letters*, vol. 808, L3, 2015, doi: 10.1088/2041-8205/808/1/L3.
+
+[21] S. M. Kay, *Fundamentals of Statistical Signal Processing: Estimation
+Theory*. Englewood Cliffs, NJ: Prentice Hall, 1993.
 

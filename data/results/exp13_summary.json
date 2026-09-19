@@ -1,0 +1,142 @@
+{
+  "m_pads": 80,
+  "model": {
+    "distance_pc": 140.0,
+    "gamma": 0.5,
+    "gap_depth": 0.5,
+    "gap_radius_au": 32.3,
+    "gap_width_au": 4.5,
+    "name": "HL Tau (ALMA Partnership 2015)",
+    "r0_au": 10.0,
+    "r_in_au": 1.0,
+    "r_out_au": 120.0
+  },
+  "n_select": 20,
+  "requirement": {
+    "b_max_required_m": 2723.2409945704308,
+    "b_min_allowed_m": 72.14273880766257,
+    "q_max_required": 2725126.2550812047,
+    "q_min_allowed": 72192.68218648373,
+    "source": "HL Tau (ALMA Partnership 2015)",
+    "theta_disc_arcsec": 1.7142857142857142,
+    "theta_gap_arcsec": 0.07569,
+    "wavelength_m": 0.0009993081933333333
+  },
+  "runs": [
+    {
+      "b_max_m": 411.5646119097293,
+      "cells": 1330,
+      "objective": "max cells",
+      "redundancy": 11.714285714285714,
+      "seconds": 2.166944980621338,
+      "sigma_depth": 34872746604.67789,
+      "sigma_radius": 1836669662314.397,
+      "sigma_width": 325535105069.67633
+    },
+    {
+      "b_max_m": 415.68488521112306,
+      "cells": 1304,
+      "objective": "w-cells: depth",
+      "redundancy": 11.947852760736197,
+      "seconds": 5.157843112945557,
+      "sigma_depth": 35311641815.21871,
+      "sigma_radius": 1831098917585.5723,
+      "sigma_width": 329886547755.1321
+    },
+    {
+      "b_max_m": 355.33800974293405,
+      "cells": 756,
+      "objective": "Fisher: depth",
+      "redundancy": 20.608465608465607,
+      "seconds": 6.684609651565552,
+      "sigma_depth": 31240947985.37706,
+      "sigma_radius": 3529568101492.6704,
+      "sigma_width": 290532938449.1871
+    },
+    {
+      "b_max_m": 410.8374313938824,
+      "cells": 1312,
+      "objective": "w-cells: radius",
+      "redundancy": 11.875,
+      "seconds": 5.820089340209961,
+      "sigma_depth": 37457007139.02178,
+      "sigma_radius": 1657787970022.6265,
+      "sigma_width": 350340103396.038
+    },
+    {
+      "b_max_m": 390.0907761305712,
+      "cells": 1206,
+      "objective": "Fisher: radius",
+      "redundancy": 12.918739635157545,
+      "seconds": 5.540875673294067,
+      "sigma_depth": 42376387803.92609,
+      "sigma_radius": 1543065275936.463,
+      "sigma_width": 396850388483.80096
+    },
+    {
+      "b_max_m": 415.68488521112306,
+      "cells": 1304,
+      "objective": "w-cells: width",
+      "redundancy": 11.947852760736197,
+      "seconds": 5.330365896224976,
+      "sigma_depth": 35311641815.21871,
+      "sigma_radius": 1831098917585.5723,
+      "sigma_width": 329886547755.1321
+    },
+    {
+      "b_max_m": 344.43177097575017,
+      "cells": 734,
+      "objective": "Fisher: width",
+      "redundancy": 21.22615803814714,
+      "seconds": 6.328268527984619,
+      "sigma_depth": 31175099909.38864,
+      "sigma_radius": 3388645430853.2427,
+      "sigma_width": 290012444241.1769
+    }
+  ],
+  "source": "HL Tau (ALMA Partnership 2015)",
+  "verdict": {
+    "depth": {
+      "cell_count_cost_percent": 43.1578947368421,
+      "error_bar_improvement_percent": 10.414432394647262,
+      "redundancy_cellcount": 11.714285714285714,
+      "redundancy_fisher": 20.608465608465607,
+      "sigma_cellcount_array": 34872746604.67789,
+      "sigma_fisher_array": 31240947985.37706
+    },
+    "radius": {
+      "cell_count_cost_percent": 9.323308270676693,
+      "error_bar_improvement_percent": 15.985693693440858,
+      "redundancy_cellcount": 11.714285714285714,
+      "redundancy_fisher": 12.918739635157545,
+      "sigma_cellcount_array": 1836669662314.397,
+      "sigma_fisher_array": 1543065275936.463
+    },
+    "width": {
+      "cell_count_cost_percent": 44.81203007518797,
+      "error_bar_improvement_percent": 10.91208299052611,
+      "redundancy_cellcount": 11.714285714285714,
+      "redundancy_fisher": 21.22615803814714,
+      "sigma_cellcount_array": 325535105069.67633,
+      "sigma_fisher_array": 290012444241.1769
+    }
+  },
+  "wavelength_m": 0.0009993081933333333,
+  "weight_bands_m": {
+    "depth": {
+      "band_hi_m": 229.4330965746644,
+      "band_lo_m": 105.18320241876293,
+      "peak_baseline_m": 166.1499971196641
+    },
+    "radius": {
+      "band_hi_m": 1282.783265748944,
+      "band_lo_m": 276.95778358934206,
+      "peak_baseline_m": 783.4774086776429
+    },
+    "width": {
+      "band_hi_m": 227.38554450468152,
+      "band_lo_m": 104.24450574833759,
+      "peak_baseline_m": 164.6672085612166
+    }
+  }
+}
