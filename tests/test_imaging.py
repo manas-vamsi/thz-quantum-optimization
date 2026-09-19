@@ -227,3 +227,142 @@ def test_noise_degrades_dynamic_range_monotonically():
         restored, _ = restore(comps, res, beam)
         drs.append(fidelity_metrics(restored, sky, beam, res)["dynamic_range"])
     assert drs[0] < drs[1] < drs[2]
+
+
+# --------------------------------------------------------------------------
+# instrumental effects
+# --------------------------------------------------------------------------
+
+from thz_opt.imaging import (  # noqa: E402
+    apply_primary_beam,
+    primary_beam,
+    primary_beam_fwhm_arcsec,
+    radiometer_noise,
+    sefd,
+    smear_image,
+    system_temperature,
+)
+
+ARCSEC = np.pi / (180.0 * 3600.0)
+
+
+def test_primary_beam_width_follows_lambda_over_d():
+    lam = 299_792_458.0 / 230e9
+    w8 = primary_beam_fwhm_arcsec(8.0, lam)
+    assert w8 == pytest.approx(1.13 * lam / 8.0 / ARCSEC)
+    # twice the dish, half the beam
+    assert primary_beam_fwhm_arcsec(16.0, lam) == pytest.approx(w8 / 2)
+    # twice the wavelength, twice the beam
+    assert primary_beam_fwhm_arcsec(8.0, 2 * lam) == pytest.approx(2 * w8)
+
+
+def test_primary_beam_is_unity_at_centre_and_half_at_the_fwhm():
+    lam = 299_792_458.0 / 230e9
+    a = primary_beam(GRID, dish_m=8.0, wavelength_m=lam)
+    c = GRID.n_cells // 2
+    assert a[c, c] == pytest.approx(1.0)
+
+    fwhm = primary_beam_fwhm_arcsec(8.0, lam) * ARCSEC
+    pix = 1.0 / (GRID.n_cells * GRID.cell_size)
+    k = int(round(0.5 * fwhm / pix))
+    if 0 < k < c:
+        assert a[c + k, c] == pytest.approx(0.5, abs=0.02)
+
+
+def test_primary_beam_attenuates_an_off_axis_source():
+    lam = 299_792_458.0 / 230e9
+    pix_arcsec = 1.0 / (GRID.n_cells * GRID.cell_size) / ARCSEC
+    sky = point_sources(GRID, [(0.0, 0.0), (20 * pix_arcsec, 0.0)], [1.0, 1.0])
+    attenuated = apply_primary_beam(sky, 8.0, lam, GRID)
+    c = GRID.n_cells // 2
+    assert attenuated.image[c, c] == pytest.approx(1.0)
+    assert attenuated.image[c + 20, c] < 1.0
+    assert attenuated.total_flux < sky.total_flux
+
+
+def test_zero_smearing_is_exactly_the_identity():
+    """The no-smear limit must not leak flux to interpolation.
+
+    An earlier polar-resampling implementation lost up to 24 % of a point
+    source here while applying no actual smearing, so this is asserted exactly
+    rather than approximately.
+    """
+    sky = point_sources(GRID, [(0.0, 0.0), (3.0, -2.0)], [1.0, 0.5])
+    out = smear_image(sky.image, fractional_bandwidth=0.0, integration_s=0.0)
+    assert np.array_equal(out, sky.image)
+
+
+def test_smearing_grows_with_distance_from_the_phase_centre():
+    """The defining property: smearing defines a field of view."""
+    pix_arcsec = 1.0 / (GRID.n_cells * GRID.cell_size) / ARCSEC
+    radii = (0, 8, 16, 24)
+    sky = point_sources(GRID, [(r * pix_arcsec, 0.0) for r in radii],
+                        [1.0] * len(radii))
+    out = smear_image(sky.image, fractional_bandwidth=0.08)
+    c = GRID.n_cells // 2
+    peaks = [out[c + r, c] for r in radii]
+    assert peaks[0] == pytest.approx(1.0, abs=0.05)   # centre barely touched
+    assert peaks == sorted(peaks, reverse=True)       # monotonic falloff
+    assert peaks[-1] < 0.6 * peaks[0]
+
+
+def test_smearing_conserves_total_flux():
+    """Smearing redistributes brightness; it does not destroy it."""
+    sky = gaussian_source(GRID, fwhm_arcsec=2.0, flux=1.0)
+    for bw, t in ((0.05, 0.0), (0.0, 600.0), (0.05, 600.0)):
+        out = smear_image(sky.image, fractional_bandwidth=bw, integration_s=t,
+                          declination_deg=30.0)
+        assert out.sum() == pytest.approx(1.0, rel=0.03)
+
+
+def test_time_smearing_vanishes_at_the_pole():
+    """A source at the celestial pole has no tangential smear: cos(dec) = 0."""
+    sky = point_sources(GRID, [(5.0, 0.0)], [1.0])
+    at_pole = smear_image(sky.image, integration_s=600.0, declination_deg=90.0)
+    assert np.array_equal(at_pole, sky.image)
+
+
+# --------------------------------------------------------------------------
+# noise on a physical scale
+# --------------------------------------------------------------------------
+
+def test_system_temperature_rises_with_opacity_and_airmass():
+    clear = system_temperature(0.05, elevation_deg=90.0)
+    thick = system_temperature(0.40, elevation_deg=90.0)
+    low = system_temperature(0.05, elevation_deg=30.0)
+    assert thick["t_sys_k"] > clear["t_sys_k"]
+    assert low["t_sys_k"] > clear["t_sys_k"]
+    assert clear["transmission"] > thick["transmission"]
+    assert low["airmass"] == pytest.approx(2.0)
+
+
+def test_zero_opacity_leaves_only_receiver_and_cmb():
+    t = system_temperature(0.0, elevation_deg=90.0, t_receiver_k=60.0)
+    assert t["transmission"] == pytest.approx(1.0)
+    assert t["t_sys_k"] == pytest.approx(60.0 + 2.73, abs=0.01)
+
+
+def test_invalid_elevation_is_rejected():
+    with pytest.raises(ValueError):
+        system_temperature(0.1, elevation_deg=0.0)
+
+
+def test_sefd_scales_as_tsys_over_area():
+    a = sefd(100.0, 8.0)
+    assert sefd(200.0, 8.0) == pytest.approx(2 * a)       # twice Tsys
+    assert sefd(100.0, 16.0) == pytest.approx(a / 4)      # twice the diameter
+
+
+def test_radiometer_noise_follows_the_root_law():
+    s = sefd(120.0, 8.0)
+    base = radiometer_noise(s, 16, 8e9, 3600.0)["sigma_jy"]
+    longer = radiometer_noise(s, 16, 8e9, 14400.0)["sigma_jy"]
+    assert longer == pytest.approx(base / 2)              # 4x time, half noise
+    wider = radiometer_noise(s, 16, 32e9, 3600.0)["sigma_jy"]
+    assert wider == pytest.approx(base / 2)               # 4x bandwidth
+    assert radiometer_noise(s, 16, 8e9, 3600.0)["n_baselines"] == 120
+
+
+def test_an_interferometer_needs_two_antennas():
+    with pytest.raises(ValueError):
+        radiometer_noise(1000.0, 1, 8e9, 60.0)

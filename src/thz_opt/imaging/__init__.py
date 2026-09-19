@@ -30,6 +30,15 @@ from .sky import (
 from .simulate import observe, predict_visibilities, thermal_noise_sigma
 from .clean import hogbom_clean, restore
 from .fidelity import fidelity_metrics
+from .instrument import (
+    apply_primary_beam,
+    primary_beam,
+    primary_beam_fwhm_arcsec,
+    radiometer_noise,
+    sefd,
+    smear_image,
+    system_temperature,
+)
 
 __all__ = [
     "SkyModel",
@@ -43,4 +52,11 @@ __all__ = [
     "hogbom_clean",
     "restore",
     "fidelity_metrics",
+    "primary_beam",
+    "primary_beam_fwhm_arcsec",
+    "apply_primary_beam",
+    "smear_image",
+    "system_temperature",
+    "sefd",
+    "radiometer_noise",
 ]
