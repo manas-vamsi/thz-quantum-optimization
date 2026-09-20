@@ -79,8 +79,7 @@ from thz_opt.optimize import (
 )
 from thz_opt.qubo.baseline_qubo import track_cell_multiplicities
 
-import site_data
-import terrain
+from thz_opt.sites import site_data, terrain
 
 __all__ = ["DesignSpec", "candidate_pads", "optimise_layout", "design_site",
            "write_cfg", "layout_report", "order_pads", "pad_table",

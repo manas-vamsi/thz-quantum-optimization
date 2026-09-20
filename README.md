@@ -288,6 +288,32 @@ With `sum_i x_i = N` and a pairwise reward this is exactly
 **densest-k-subgraph**: NP-hard, no known constant-factor approximation. That
 is the structural reason a QUBO solver is worth trying here at all.
 
+## 10a. Designing an array from the command line
+
+```bash
+python design_array.py --list-sites
+python design_array.py --site alma  --n 20 --m 80 --dish 12      # pick 20 of ALMA's pads
+python design_array.py --site hanle --n 16 --dish 8 --max-baseline 3000
+python design_array.py --config runs/my_design.yaml              # rerun exactly
+```
+
+Two modes, inferred from the site. **select** chooses N of an existing pad
+list; **place** generates candidates on real terrain and chooses from those.
+Each run writes `pads.csv` (latitude, longitude, elevation, local east/north),
+`baselines.csv` (every pairwise distance), `array.cfg` (CASA format),
+`report.json` and `run.yaml` — the last recording every parameter used, so a
+result can be reproduced without reconstructing the command line.
+
+`--quick` swaps Earth rotation for a snapshot and coarsens the grid, turning
+minutes into seconds for exploring. A full run is 2 to 8 minutes, most of it in
+the O(M²) UV-track precompute.
+
+**There is no penalty-weight option, deliberately.** The classical search swaps
+one pad in and one out, so the antenna count never changes and there is no
+constraint to penalise. Penalties exist only on the QUBO route, where they are
+*derived*: `--show-penalties` prints the smallest weights that provably cannot
+be cheated. A test asserts no `--lambda` flag can be added later.
+
 ## 10b. Ladakh array design
 
 `ladakh_array_design/` applies the same machinery to a different question: not

@@ -29,8 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import design
-import site_data
-import terrain
+from thz_opt.sites import site_data, terrain
 from design import DesignSpec
 from thz_opt.interferometry.earth_rotation import layout_to_uv_tracks
 from thz_opt.interferometry.psf import dirty_beam

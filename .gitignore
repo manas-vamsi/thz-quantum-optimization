@@ -16,3 +16,4 @@ data/generated/*.npz
 # Paper build outputs (regenerate with: python paper/build_pdf.py)
 paper/*.pdf
 paper/thz-qubo-array-design-supplementary.zip
+runs/

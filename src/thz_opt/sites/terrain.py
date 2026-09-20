@@ -44,8 +44,8 @@ ground here is flat enough", not "this is a construction site".
 
 from __future__ import annotations
 
-import hashlib
 import io
+import os
 import math
 import urllib.request
 from pathlib import Path
@@ -64,7 +64,12 @@ __all__ = [
 ]
 
 TILE_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-CACHE = Path(__file__).resolve().parent / "data" / "dem_cache"
+#: Tile cache. Kept at the repository root rather than beside this module
+#: so it does not end up inside the installed package; override with
+#: the THZ_DEM_CACHE environment variable.
+CACHE = Path(os.environ.get(
+    "THZ_DEM_CACHE",
+    Path(__file__).resolve().parents[3] / "data" / "dem_cache"))
 MAX_SLOPE_DEG = 10.0
 EARTH_R = 6378137.0
 

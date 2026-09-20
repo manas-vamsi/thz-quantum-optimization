@@ -17,8 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "ladakh_array_design"))
 
 import design  # noqa: E402
-import site_data  # noqa: E402
-import terrain  # noqa: E402
+from thz_opt.sites import site_data, terrain  # noqa: E402
 from thz_opt.arrays.real_arrays import load_cfg  # noqa: E402
 
 HANLE = site_data.site("hanle")
