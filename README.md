@@ -1,5 +1,10 @@
 # Quantum Optimization of Terahertz Interferometric Architectures
 
+> **New here, or reviewing this work?** Start with
+> [`handover/README.md`](handover/README.md) — what was asked for, what was
+> built, the three findings that change the plan, and how to continue. About ten
+> minutes, with pointers to the evidence for anything you want to check.
+
 Research prototype. Classical foundation first: array layouts → baselines →
 (u,v) → UV-cell occupancy → metrics → PSF → a small, **validated** QUBO — which
 is then actually solved and benchmarked against certified optima.
