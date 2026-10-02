@@ -14,6 +14,7 @@ evidence for anything you want to check.
 | [`RESULTS.md`](RESULTS.md) | Every number, with the script that produced it |
 | [`HOW_TO_RUN.md`](HOW_TO_RUN.md) | Reproduce anything, or design an array yourself, in five commands |
 | [`WHAT_REMAINS.md`](WHAT_REMAINS.md) | Open questions, what is deliberately unfinished, and how to continue |
+| [`SLIDES.md`](SLIDES.md) | Presentation content: 18 slides with speaker notes and a source link for every number |
 
 ---
 
