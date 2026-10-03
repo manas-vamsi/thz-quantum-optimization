@@ -3,7 +3,7 @@ const pptxgen = require("pptxgenjs");
 const path = require("path");
 
 const REPO = "D:/thz-quantum-optimization";
-const OUT = path.join(REPO, "handover", "Progress_Report_Final.pptx");
+const OUT = path.join(REPO, "handover", "Progress_Report_Final_v2.pptx");
 const URL = "github.com/manas-vamsi/thz-quantum-optimization";
 
 const NAVY = "0B1D3A", INK = "1B2A41", AMBER = "F2A541", TEAL = "2A9D8F",
@@ -32,7 +32,7 @@ pres.defineSlideMaster({
 });
 
 const T = (s, text, o) => s.addText(text, Object.assign({ isTextBox: true, fontFace: "Calibri",
-  color: INK, fontSize: 15, margin: 0 }, o));
+  color: INK, fontSize: 15, margin: 0, valign: "top" }, o));
 const card = (s, x, y, w, h, fill) => s.addShape(pres.shapes.ROUNDED_RECTANGLE,
   { x, y, w, h, fill: { color: fill }, line: { color: fill }, rectRadius: 0.08 });
 const bullets = (items) => items.map((t, i) => ({ text: t,
@@ -114,6 +114,86 @@ s.addTable([head, ...body], { x: 0.5, y: 1.2, w: 9.0, colW: [1.8, 2.4, 2.9, 1.9]
 T(s, "Long baselines give sharp detail.  Short baselines show big objects.  A good array needs both.",
   { x: 0.5, y: 4.65, w: 9, h: 0.4, fontSize: 15, bold: true, color: TEAL });
 s.addNotes("Worked example: lambda = 3e8 / 230e9 = 1.3 mm. Resolution = 1.3 mm / 2788 m = 0.096 arcsec. 1 arcsec = 1/3600 degree. Note: lambda is also the name of the penalty weights in the QUBO - ask which one is meant.");
+
+// QA-1 What is quantum annealing --------------------------------
+pres.addSection({ title: "Quantum Annealing" });
+s = slide("What Is Quantum Annealing?", "Quantum Annealing");
+{
+  // an energy landscape: many local valleys, one deepest valley
+  const xs = [], ys = [];
+  for (let i = 0; i <= 40; i++) {
+    const x = i / 40;
+    const y = 5 + 1.6 * Math.sin(14 * x) + 1.1 * Math.sin(31 * x)
+            - 4.2 * Math.exp(-Math.pow((x - 0.68) / 0.06, 2)) + 2.0 * x;
+    xs.push(""); ys.push(Math.round(y * 100) / 100);
+  }
+  s.addChart(pres.charts.LINE, [{ name: "energy", labels: xs, values: ys }], Object.assign({
+    x: 0.5, y: 1.2, w: 5.0, h: 3.0, lineSize: 3, lineSmooth: true, lineDataSymbol: "none",
+    chartColors: [NAVY], showLegend: false, valAxisHidden: true, catAxisHidden: true,
+    valGridLine: { style: "none" }, catGridLine: { style: "none" },
+    showTitle: true, title: "Every possible answer has an 'energy'", titleFontSize: 13, titleColor: NAVY,
+  }, chartText));
+  T(s, "local valley", { x: 1.6, y: 3.3, w: 1.4, h: 0.3, fontSize: 11, color: AMBER, bold: true, align: "center" });
+  T(s, "deepest valley = best", { x: 3.2, y: 3.65, w: 1.6, h: 0.3, fontSize: 11, color: TEAL, bold: true, align: "center" });
+  T(s, bullets([
+    "Classical search climbs OVER the hills",
+    "Quantum annealing can TUNNEL THROUGH them",
+  ]), { x: 0.5, y: 4.3, w: 5.0, h: 0.8, fontSize: 14, paraSpaceAfter: 4 });
+}
+card(s, 5.8, 1.2, 3.7, 3.9, LIGHT);
+T(s, "HOW IT WORKS", { x: 6.05, y: 1.35, w: 3.2, h: 0.3, fontSize: 13, bold: true, color: NAVY });
+[["Start", "Qubits are 0 and 1 at the same time (superposition)"],
+ ["Slowly change", "Gradually switch on our problem"],
+ ["End", "Qubits settle into the lowest-energy answer"]].forEach(([a, b], i) => {
+  const y = 1.8 + i * 0.95;
+  circle(s, 6.05, y, 0.42, String(i + 1), TEAL);
+  T(s, a, { x: 6.6, y: y - 0.02, w: 2.8, h: 0.3, fontSize: 14, bold: true, color: NAVY });
+  T(s, b, { x: 6.6, y: y + 0.3, w: 2.8, h: 0.55, fontSize: 12 });
+});
+T(s, "H(t) = A*H_start + B*H_problem", { x: 6.05, y: 4.6, w: 3.3, h: 0.35, fontSize: 11, fontFace: "Courier New", color: TEAL, bold: true });
+s.addNotes("Picture every possible antenna layout as a point on a landscape, with height = energy (how bad the layout is). We want the lowest point. Classical methods walk and must climb over hills to escape a valley. A quantum annealer can tunnel through hills. It starts with all qubits in superposition, slowly turns on the problem, and if done slowly enough ends in the lowest-energy state (adiabatic theorem). t goes from 0 to 1 during the anneal.");
+
+// QA-2 How a problem runs --------------------------------------
+s = slide("How a Problem Runs on a Quantum Annealer", "Quantum Annealing");
+const qsteps = [["Write as QUBO", "0/1 choices"], ["Convert to Ising", "spins -1/+1"],
+  ["Map to qubits", "embedding"], ["Anneal", "~20 microseconds"], ["Repeat", "keep best answer"]];
+qsteps.forEach(([a, b], i) => {
+  const x = 0.5 + i * 1.84;
+  card(s, x, 1.3, 1.66, 1.5, i === 0 ? AMBER : LIGHT);
+  T(s, String(i + 1), { x, y: 1.38, w: 1.66, h: 0.45, align: "center", fontSize: 22, bold: true,
+    fontFace: "Cambria", color: i === 0 ? WHITE : TEAL });
+  T(s, a, { x: x + 0.05, y: 1.85, w: 1.56, h: 0.4, align: "center", fontSize: 14, bold: true, color: i === 0 ? WHITE : NAVY });
+  T(s, b, { x: x + 0.05, y: 2.25, w: 1.56, h: 0.4, align: "center", fontSize: 12, color: i === 0 ? WHITE : MUTED });
+});
+card(s, 0.5, 3.05, 4.4, 2.0, LIGHT);
+T(s, "THE TWO FORMS", { x: 0.75, y: 3.2, w: 4.0, h: 0.3, fontSize: 13, bold: true, color: NAVY });
+T(s, "QUBO    x = 0 or 1\nIsing   s = -1 or +1\nLink    x = (1 + s) / 2",
+  { x: 0.75, y: 3.6, w: 4.0, h: 0.95, fontSize: 14, fontFace: "Courier New", color: INK });
+T(s, "Same problem, two ways of writing it.", { x: 0.75, y: 4.6, w: 4.0, h: 0.3, fontSize: 12, italic: true, color: MUTED });
+card(s, 5.1, 3.05, 4.4, 2.0, NAVY);
+T(s, "THE HARDWARE (D-Wave)", { x: 5.35, y: 3.2, w: 4.0, h: 0.3, fontSize: 13, bold: true, color: AMBER });
+T(s, bullets([
+  "About 5,000 qubits",
+  "Each qubit links to only ~15 others",
+  "Big problems need several qubits per variable",
+]), { x: 5.35, y: 3.6, w: 4.0, h: 1.35, fontSize: 13, color: WHITE, paraSpaceAfter: 5 });
+s.addNotes("Our work is step 1: writing the problem as a QUBO. The machine works with spins of -1 and +1 (Ising form), which is the same thing with x = (1+s)/2. Because each qubit connects to only about 15 others, a dense problem must be 'embedded': one variable becomes a chain of several qubits. Each anneal takes about 20 microseconds and is repeated many times; the best answer is kept.");
+
+// QA-3 Strengths, limitations, our project ----------------------
+s = slide("Strengths, Limits and Our Project", "Quantum Annealing");
+verdict(s, 0.5, 1.2, 4.3,
+  ["Can tunnel out of local valleys", "Each run is very fast (microseconds)"],
+  ["Few qubits, limited connections", "No proven speed-up in general"]);
+card(s, 5.1, 1.2, 4.4, 3.85, NAVY);
+T(s, "IN OUR PROJECT", { x: 5.35, y: 1.35, w: 4.0, h: 0.3, fontSize: 13, bold: true, color: AMBER });
+T(s, bullets([
+  "Our problem is written as a QUBO - ready for D-Wave",
+  "40 pads = 820 variables, 33,689 links - very dense",
+  "Too dense for direct use on today's hardware",
+  "We used simulated annealing (classical copy) to test it",
+  "Next step: run on real D-Wave hardware",
+]), { x: 5.35, y: 1.75, w: 4.0, h: 3.2, fontSize: 13, color: WHITE, paraSpaceAfter: 7 });
+s.addNotes("Be clear on terms: simulated annealing is a classical algorithm that copies the idea of annealing; quantum annealing uses real qubits. We ran simulated annealing through D-Wave's software, so the same QUBO can be sent to real hardware without changes. The challenge is density: 33,689 links at 40 pads, while each qubit links to only about 15 others.");
 
 // 4 Parseval ------------------------------------------------------
 s = slide("Parseval's Theorem and How We Used It", "Background");
